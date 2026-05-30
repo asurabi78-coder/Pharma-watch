@@ -1,0 +1,1 @@
+"""뉴스 사이트별 fetcher. 각 fetcher 는 List[NewsItem] 을 반환."""

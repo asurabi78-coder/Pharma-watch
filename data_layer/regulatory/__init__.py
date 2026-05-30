@@ -1,0 +1,1 @@
+"""규제 데이터 레이어 — pharma 3PL 규제 검토용 (KGSP/GDP/GMP)."""
