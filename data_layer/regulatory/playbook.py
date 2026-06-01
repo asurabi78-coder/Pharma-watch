@@ -123,7 +123,8 @@ class TopicPlaybook:
 
     id: str
     topic: str
-    summary: str = ""
+    summary: str = ""             # 1~2문장 한 줄 요약
+    overview: str = ""            # 개요 — 무엇이고 어떤 법 체계가 적용되는지 몇 줄 설명
     aliases: List[str] = field(default_factory=list)
 
     reg_refs: List[RegRef] = field(default_factory=list)

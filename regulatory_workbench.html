@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>규제 작업대 · Regulatory Workbench</title>
+<style>
+  :root{
+    --teal:#0ea5a0; --teal-d:#0c8983; --teal-soft:rgba(14,165,160,0.10);
+    --bg:#eef2f7; --surface:#ffffff; --surface-2:#f6f8fb;
+    --text:#0f172a; --mid:#475569; --muted:#94a3b8;
+    --border:#e4e9f0; --border-soft:#eef1f6;
+    --red:#ef4444; --amber:#f59e0b; --blue:#3b82f6; --slate:#64748b;
+    --red-soft:rgba(239,68,68,0.10); --amber-soft:rgba(245,158,11,0.12);
+    --blue-soft:rgba(59,130,246,0.10); --green:#10b981; --green-soft:rgba(16,185,129,0.12);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); color:var(--text);
+    font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif; font-size:14px; line-height:1.55;}
+  a{color:var(--teal-d); text-decoration:none;}
+  a:hover{text-decoration:underline;}
+  button{font-family:inherit; cursor:pointer;}
+
+  .top{display:flex; align-items:center; justify-content:space-between; gap:12px;
+    padding:14px 22px; background:var(--surface); border-bottom:1px solid var(--border);}
+  .brand{display:flex; align-items:baseline; gap:10px;}
+  .brand b{font-size:18px; font-weight:700;}
+  .brand span{font-size:12px; color:var(--muted);}
+  .recpill{font-size:12px; color:var(--mid); background:var(--surface-2);
+    border:1px solid var(--border); border-radius:20px; padding:5px 12px;}
+
+  .wrap{display:flex; gap:0; min-height:calc(100vh - 56px);}
+  .rail{flex:0 0 248px; background:var(--surface); border-right:1px solid var(--border);
+    padding:16px 14px; overflow-y:auto;}
+  .rail h4{font-size:11px; font-weight:700; letter-spacing:.04em; color:var(--muted);
+    text-transform:uppercase; margin:18px 0 8px;}
+  .rail h4:first-child{margin-top:0;}
+  .scn{display:flex; align-items:center; gap:9px; width:100%; text-align:left;
+    border:1px solid var(--border); background:var(--surface); color:var(--text);
+    border-radius:11px; padding:10px 12px; margin-bottom:7px; font-size:13.5px; font-weight:600;
+    transition:all .12s;}
+  .scn:hover{border-color:var(--teal); background:var(--teal-soft);}
+  .scn.active{border-color:var(--teal); background:var(--teal-soft); color:var(--teal-d);}
+  .scn .dot{width:8px; height:8px; border-radius:50%; flex:0 0 8px;}
+  .scn small{margin-left:auto; font-size:10.5px; font-weight:700; padding:1px 7px; border-radius:10px;}
+  .imp-high{background:var(--red-soft); color:#b91c1c;}
+  .imp-mid{background:var(--amber-soft); color:#b45309;}
+  .imp-low{background:var(--surface-2); color:var(--slate);}
+  .srch{width:100%; border:1px solid var(--border); border-radius:9px; padding:8px 11px;
+    font-size:12.5px; outline:none; background:var(--surface-2);}
+  .srch:focus{border-color:var(--teal); background:#fff;}
+  .recent{font-size:12.5px; color:var(--mid); line-height:2; cursor:pointer;}
+  .recent span:hover{color:var(--teal-d);}
+
+  .main{flex:1; min-width:0; padding:20px 26px 40px; overflow-y:auto;}
+  .case-head{display:flex; align-items:center; justify-content:space-between; gap:12px;
+    flex-wrap:wrap; padding-bottom:12px; border-bottom:1px solid var(--border); margin-bottom:14px;}
+  .case-title{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+  .case-title b{font-size:22px; font-weight:700;}
+  .pill{font-size:11px; font-weight:700; padding:3px 10px; border-radius:8px;}
+  .acts{display:flex; gap:8px;}
+  .btn{font-size:12.5px; font-weight:600; padding:7px 13px; border-radius:9px;
+    border:1px solid var(--border); background:var(--surface); color:var(--text); transition:all .12s;}
+  .btn:hover{border-color:var(--teal); color:var(--teal-d);}
+  .btn.primary{background:var(--teal); border-color:var(--teal); color:#fff;}
+  .btn.primary:hover{background:var(--teal-d); color:#fff;}
+
+  .deadline{display:flex; align-items:center; gap:9px; background:var(--red-soft);
+    border:1px solid rgba(239,68,68,0.25); border-radius:10px; padding:10px 14px; margin-bottom:16px;
+    font-size:13px; color:#b91c1c;}
+  .summary{font-size:13px; color:var(--mid); margin:-4px 0 16px;}
+
+  .prog-row{display:flex; align-items:center; gap:10px; margin-bottom:10px;}
+  .prog-row b{font-size:14px;}
+  .prog{flex:1; height:7px; background:var(--surface-2); border:1px solid var(--border);
+    border-radius:20px; overflow:hidden;}
+  .prog>i{display:block; height:100%; background:var(--teal); transition:width .2s;}
+  .prog-pct{font-size:12.5px; color:var(--mid); font-weight:600; min-width:36px; text-align:right;}
+
+  .ck{display:flex; gap:10px; align-items:flex-start; padding:9px 12px; border:1px solid var(--border-soft);
+    border-radius:10px; margin-bottom:7px; background:var(--surface); cursor:pointer;}
+  .ck:hover{border-color:var(--border);}
+  .ck input{margin-top:3px; width:16px; height:16px; accent-color:var(--teal); flex:0 0 16px;}
+  .ck .a{font-size:13.5px;}
+  .ck.done .a{text-decoration:line-through; color:var(--muted);}
+  .ck .d{font-size:11.5px; color:var(--muted); margin-top:2px;}
+
+  .tabs{display:flex; gap:2px; border-bottom:1px solid var(--border); margin:22px 0 14px;}
+  .tab{font-size:13.5px; font-weight:600; padding:9px 14px; border:none; background:none;
+    color:var(--muted); border-bottom:2px solid transparent;}
+  .tab.active{color:var(--text); border-bottom-color:var(--teal);}
+  .tab:hover{color:var(--text);}
+
+  .card{border:1px solid var(--border); border-radius:12px; padding:13px 16px; margin-bottom:11px; background:var(--surface);}
+  .card .badges{display:flex; gap:7px; align-items:center; margin-bottom:6px; flex-wrap:wrap;}
+  .card .t{font-size:14.5px; font-weight:700; margin-bottom:2px;}
+  .card .meta{font-size:11.5px; color:var(--muted); margin-bottom:8px;}
+  .kp{font-size:13px; color:var(--mid); margin:5px 0 5px 2px; padding-left:12px; position:relative; line-height:1.6;}
+  .kp:before{content:""; position:absolute; left:0; top:9px; width:4px; height:4px; border-radius:50%; background:var(--teal);}
+  .src-tag{font-size:10.5px; font-weight:700; padding:1px 7px; border-radius:8px; background:var(--surface-2); color:var(--slate);}
+  .qrow{border-left:2px solid var(--border); padding:3px 0 3px 12px; margin-bottom:12px;}
+  .qrow .q{font-size:13.5px; font-weight:600;}
+  .qrow .h{font-size:12px; color:var(--mid); margin-top:3px;}
+  .chg{background:var(--amber-soft); border:1px solid rgba(245,158,11,0.25); border-radius:10px;
+    padding:9px 13px; margin-bottom:9px; font-size:12.5px; color:#92520a;}
+  .reflink{display:block; padding:9px 12px; border:1px solid var(--border-soft); border-radius:10px;
+    margin-bottom:8px; background:var(--surface);}
+  .reflink .rt{font-size:13px; font-weight:600;}
+  .reflink .rn{font-size:11.5px; color:var(--muted); margin-top:2px;}
+  .note{font-size:11.5px; color:var(--muted); margin:4px 0 12px;}
+  .foot{margin-top:24px; padding-top:14px; border-top:1px solid var(--border);
+    font-size:12px; color:var(--muted);}
+  .warnaux{font-size:11.5px; color:#92520a; background:var(--amber-soft); border-radius:8px; padding:7px 11px; margin-bottom:10px;}
+
+  #toast{position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px);
+    background:var(--text); color:#fff; padding:11px 18px; border-radius:10px; font-size:13px;
+    opacity:0; pointer-events:none; transition:all .25s;}
+  #toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="brand"><b>🧪 규제 작업대</b><span>Regulatory Workbench · QA 의사결정 지원</span></div>
+  <div class="recpill" id="recpill">기록 0건</div>
+</div>
+
+<div class="wrap">
+  <aside class="rail">
+    <h4>무슨 상황이세요?</h4>
+    <div id="scnlist"></div>
+    <h4>검색</h4>
+    <input class="srch" id="srch" placeholder="법령·키워드 (예: 온도, 출하증명)" oninput="renderRail()">
+    <h4>최근 본 사안</h4>
+    <div class="recent" id="recent"></div>
+  </aside>
+
+  <main class="main" id="main"></main>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const PB = [{"id": "temp_excursion", "topic": "온도 이탈", "summary": "보관·운송 중 허용 온도 범위를 벗어난 상황. 콜드체인 3PL 에서 가장 빈번하고, 위탁자 통보 기한·격리·CAPA 가 한 묶음으로 걸린다.", "aliases": ["온도이탈", "온도 일탈", "일탈", "excursion", "콜드체인", "보관 온도", "온도"], "audit_impact": "높음", "report_deadline": "감지 즉시 격리·품질팀 통지 → 24h 내 위탁자 서면 통보 → 7일 내 CAPA 초안 (SLA 우선)", "verified": false, "binding": [{"title": "의약품 등의 안전 및 품질관리에 관한 규정 — 보관 관리", "tier": "LAW", "tier_label": "법령", "sole": true, "article": "제○조(보관 관리)", "url": "https://www.law.go.kr/LSW/lsSc.do?menuId=1&query=의약품 등의 안전 및 품질관리에 관한 규정", "effective_date": "2024-01-01", "key_points": []}, {"title": "의약품 안전운송 관리 기준 (식약처 고시)", "tier": "NOTICE", "tier_label": "고시", "sole": true, "article": "식약처 고시 제2024-○호", "url": "https://www.law.go.kr/LSW/admRulSc.do?menuId=5&query=의약품 안전운송 관리 기준", "effective_date": "2024-06-01", "key_points": []}], "guides": [{"title": "WHO GDP — 콜드체인 가이드", "tier": "GUIDE", "tier_label": "가이드", "sole": true, "article": "GDP §5 (Cold Chain)", "url": "https://www.who.int/publications/i/item/WHO-TRS-961", "effective_date": "2020-03-15", "key_points": ["온도 유지·검증(Qualification/Validation): 보관소·냉장/냉동 차량·수송용기는 IQ/OQ/PQ 로 사전 검증. 2~8℃ 또는 −25~−15℃ 등 제품별 온도 범위 이탈 금지.", "온도 매핑(Temperature Mapping): 보관 창고 위치별 온도 편차 파악을 위해 최소 연 1회 매핑 → 안전 보관 구역 설정.", "실시간 모니터링: 보관·운송 전 과정 온도 기록계 부착, 환경 지속 모니터링 + 기록 보관.", "운송 포장 검증(Packaging Validation): 단열 수송 용기 사용, 계절별 외부 온도 변화를 견디는지 테스트."]}], "reference_links": [{"title": "WHO TRS — Good Distribution Practices for pharmaceutical products", "url": "https://www.who.int/publications/i/item/WHO-TRS-961", "source": "WHO", "note": "콜드체인 보관·운송·검증의 국제 기준 원문(PDF).", "verified": true}, {"title": "식약처 의약품 우수유통관리기준(KGSP) 안내서", "url": "https://www.mfds.go.kr", "source": "MFDS", "note": "국내 유통품질관리기준 해설 — 냉장·냉동 보관, 출하 온도 검수 의무.", "verified": true}, {"title": "PIC/S GDP Guide (PE 011)", "url": "https://picscheme.org/en/publications", "source": "PIC/S", "note": "실사 대응 시 자주 참조되는 국제 GDP 가이드.", "verified": true}], "recent_changes": [{"date": "2026-06-06", "kind": "개정 예고", "summary": "콜드체인 보관·운송 가이드라인 개정 — 2~8℃ 온도 일탈 보고 절차 강화, 운송 중 모니터링 데이터 보관기간 명시.", "url": "https://www.law.go.kr/LSW/admRulSc.do?menuId=5&query=콜드체인 보관 운송 가이드라인"}], "checklist": [{"action": "해당 의약품 즉시 격리 (노란색 라벨)", "detail": "물리적 격리 + 시스템 상태 변경. 출하 차단.", "sop": "SOP-QA-001"}, {"action": "데이터 로거 기록 다운로드·보존", "detail": "원본 로그 보존(가공 금지) + 일탈 구간 캡처.", "sop": "SOP-QA-001"}, {"action": "품질팀 즉시 통지 (전화 + 이메일)", "detail": "감지 시점 기준 지체 없이.", "sop": "SOP-QA-001"}, {"action": "위탁자(제약사)에 24시간 내 서면 통보", "detail": "SLA 에 더 짧은 기한이 있으면 SLA 우선.", "sop": ""}, {"action": "CAPA 작성 → 7일 내 초안, 5년 보관", "detail": "QA·GDP Director 검토 후 종결.", "sop": ""}], "audit_questions": [{"q": "온도 일탈 발생 시 격리·통보·CAPA 까지의 타임라인을 증빙할 수 있습니까?", "hint": "일탈 로그 + 격리 사진/라벨 + 위탁자 통보 이메일 타임스탬프 + CAPA 번호를 한 세트로 준비."}, {"q": "운송 온도 모니터링(데이터 로거) 검교정 기록이 있습니까?", "hint": "로거 검교정 성적서 + 주기 + 검교정 기관."}, {"q": "온도 Mapping(매핑)을 연 1회 이상 수행했습니까?", "hint": "보관소·차량별 매핑 보고서 + 최근 수행일."}], "common_issues": [{"name": "냉장차량 온도 일탈", "keyword": "운송 온도"}, {"name": "데이터 로거 기록 누락", "keyword": "데이터 로거"}, {"name": "격리 지연 / 격리 라벨 누락", "keyword": "격리"}], "related_sop_ids": ["SOP-QA-001"]}, {"id": "release_cert", "topic": "출하증명", "summary": "의약품 출하 시 출하증명서 발행·보관. 위탁 3PL 의 책임 구조가 SLA 와 얽힌다.", "aliases": ["출하증명", "출하증명서", "release certificate"], "audit_impact": "중간", "report_deadline": "", "verified": false, "binding": [{"title": "의약품 출하 — 출하증명서 발행", "tier": "LAW", "tier_label": "법령", "sole": true, "article": "제○조(출하 관리)", "url": "https://www.law.go.kr/LSW/lsSc.do?menuId=1&query=의약품 출하증명", "effective_date": "2024-01-01", "key_points": []}], "guides": [], "reference_links": [{"title": "식약처 의약품 우수유통관리기준(KGSP) 안내서", "url": "https://www.mfds.go.kr", "source": "MFDS", "note": "출하증명서 기재사항·보관기간 관련 해설.", "verified": true}], "recent_changes": [], "checklist": [{"action": "제품명·제조번호·유효기간 기재 확인", "detail": "", "sop": ""}, {"action": "온도 로거 기록 첨부", "detail": "", "sop": ""}, {"action": "책임자 서명 + 보관기간 확인", "detail": "", "sop": ""}], "audit_questions": [{"q": "위탁자 명의 출하증명서 발행 권한·책임이 SLA 에 명시돼 있습니까?", "hint": ""}], "common_issues": [{"name": "출하증명서 보관기간", "keyword": "출하증명"}], "related_sop_ids": []}, {"id": "vaccine_brc", "topic": "백신·생물학적제제", "summary": "생물학적제제의 출하·회수·온도관리. BRC(배치기록) 관리와 출하증명서 보관이 핵심.", "aliases": ["백신", "생물학적제제", "BRC", "회수", "생물학적"], "audit_impact": "높음", "report_deadline": "", "verified": false, "binding": [{"title": "의약품 등의 안전 및 품질관리에 관한 규정 — 보관 관리", "tier": "LAW", "tier_label": "법령", "sole": true, "article": "제○조(보관 관리)", "url": "https://www.law.go.kr/LSW/lsSc.do?menuId=1&query=의약품 등의 안전 및 품질관리에 관한 규정", "effective_date": "2024-01-01", "key_points": []}], "guides": [], "reference_links": [{"title": "WHO TRS — GDP for pharmaceutical products", "url": "https://www.who.int/publications/i/item/WHO-TRS-961", "source": "WHO", "note": "생물학적제제 콜드체인 검증의 국제 기준.", "verified": true}], "recent_changes": [{"date": "2026-06-20", "kind": "행정 예고", "summary": "바이오의약품 콜드체인 모니터링 의무화 행정예고 — 의견수렴 중.", "url": "https://www.law.go.kr/LSW/admRulSc.do?menuId=5&query=바이오의약품 콜드체인 모니터링"}], "checklist": [{"action": "BRC 회수 확인", "detail": "", "sop": ""}, {"action": "보관기간 확인", "detail": "", "sop": ""}, {"action": "반품 처리 확인", "detail": "", "sop": ""}], "audit_questions": [{"q": "배치별 BRC 회수·보관이 추적 가능합니까?", "hint": ""}], "common_issues": [{"name": "BRC 회수 확인", "keyword": "회수"}, {"name": "출하증명서 보관", "keyword": "출하증명"}], "related_sop_ids": []}];
+
+const TIER_COLOR = {LAW:["#b91c1c","var(--red-soft)"], NOTICE:["#b45309","var(--amber-soft)"], GUIDE:["#1d4ed8","var(--blue-soft)"], INTERNAL:["#475569","var(--surface-2)"]};
+let activeId = PB[0].id;
+let activeTab = "규제 근거";
+
+function byId(id){ return PB.find(p=>p.id===id); }
+function ckKey(id){ return "wb_ck_"+id; }
+function getCk(id){ try{ return JSON.parse(localStorage.getItem(ckKey(id))||"[]"); }catch(e){ return []; } }
+function setCk(id, arr){ localStorage.setItem(ckKey(id), JSON.stringify(arr)); }
+
+function esc(s){ return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function impClass(v){ return v==="높음"?"imp-high":v==="중간"?"imp-mid":"imp-low"; }
+
+function toast(msg){ const t=document.getElementById("toast"); t.textContent=msg; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),2200); }
+
+function pushRecent(id){
+  let r; try{ r=JSON.parse(localStorage.getItem("wb_recent")||"[]"); }catch(e){ r=[]; }
+  r=r.filter(x=>x!==id); r.unshift(id); r=r.slice(0,5);
+  localStorage.setItem("wb_recent", JSON.stringify(r));
+}
+function getRecent(){ try{ return JSON.parse(localStorage.getItem("wb_recent")||"[]"); }catch(e){ return []; } }
+
+function recCount(){ try{ return JSON.parse(localStorage.getItem("wb_records")||"[]").length; }catch(e){ return 0; } }
+function refreshRecPill(){ document.getElementById("recpill").textContent = "기록 "+recCount()+"건"; }
+
+function renderRail(){
+  const q = (document.getElementById("srch")?.value||"").trim().toLowerCase().replace(/\s/g,"");
+  const list = PB.filter(p=>{
+    if(!q) return true;
+    return [p.topic,...p.aliases].some(k=>k.toLowerCase().replace(/\s/g,"").includes(q));
+  });
+  document.getElementById("scnlist").innerHTML = list.map(p=>`
+    <button class="scn ${p.id===activeId?'active':''}" onclick="select('${p.id}')">
+      <span class="dot" style="background:${p.audit_impact==='높음'?'var(--red)':p.audit_impact==='중간'?'var(--amber)':'var(--slate)'}"></span>
+      ${esc(p.topic)}
+      <small class="${impClass(p.audit_impact)}">${p.audit_impact||'—'}</small>
+    </button>`).join("") || `<div class="note">검색 결과 없음</div>`;
+  // recent
+  const rec = getRecent().map(id=>byId(id)).filter(Boolean);
+  document.getElementById("recent").innerHTML = rec.length
+    ? rec.map(p=>`<span onclick="select('${p.id}')">· ${esc(p.topic)}</span>`).join("<br>")
+    : `<span style="color:var(--muted)">아직 없음</span>`;
+}
+
+function select(id){ activeId=id; activeTab="규제 근거"; pushRecent(id); renderRail(); renderMain(); window.scrollTo(0,0); }
+
+function refCard(r){
+  const [fg,bg]=TIER_COLOR[r.tier]||["#475569","var(--surface-2)"];
+  const sole = r.sole
+    ? `<span class="pill" style="background:var(--green-soft);color:#047857">단독 인용 가능</span>`
+    : `<span class="pill" style="background:var(--surface-2);color:var(--slate)">참고용</span>`;
+  const kp = (r.key_points||[]).map(k=>`<div class="kp">${esc(k)}</div>`).join("");
+  const meta = [r.article, r.effective_date?("시행 "+r.effective_date):""].filter(Boolean).join(" · ");
+  const link = r.url?`<a href="${r.url}" target="_blank" rel="noopener">🔗 원문 보기 (law.go.kr)</a>`:`<span class="note">🔒 사내 문서</span>`;
+  return `<div class="card"><div class="badges"><span class="pill" style="color:${fg};background:${bg}">${r.tier_label}</span>${sole}</div>
+    <div class="t">${esc(r.title)}</div><div class="meta">${esc(meta)}</div>${kp}<div style="margin-top:8px">${link}</div></div>`;
+}
+
+function tabBody(p){
+  if(activeTab==="규제 근거"){
+    return p.binding.length? p.binding.map(refCard).join("") : `<div class="note">등록된 법령·고시가 없습니다.</div>`;
+  }
+  if(activeTab==="가이드라인"){
+    return p.guides.length? p.guides.map(refCard).join("") : `<div class="note">등록된 가이드라인이 없습니다.</div>`;
+  }
+  if(activeTab==="참고·문서"){
+    let h = p.reference_links.map(rl=>`<a class="reflink" href="${rl.url}" target="_blank" rel="noopener">
+      <div class="rt">📄 ${esc(rl.title)} ${rl.source?`<span class="src-tag">${esc(rl.source)}</span>`:""} ${rl.verified?"":"<span class='src-tag' style='color:#b45309'>확인 필요</span>"}</div>
+      ${rl.note?`<div class="rn">${esc(rl.note)}</div>`:""}</a>`).join("");
+    h += `<div class="warnaux" style="margin-top:10px">🟡 참고(웹·뉴스)는 배경 컨텍스트용 — 규정 위반 판단의 단독 근거로 사용 불가. (라이브 뉴스 매칭은 연동 시 표시)</div>`;
+    return h || `<div class="note">참고 문서가 없습니다.</div>`;
+  }
+  // 액션 요약
+  let h="";
+  if(p.recent_changes.length){
+    h += p.recent_changes.map(c=>`<div class="chg"><b>${esc(c.kind)}</b> · ${esc(c.date)} — ${esc(c.summary)} ${c.url?`<a href="${c.url}" target="_blank" rel="noopener">원문 ↗</a>`:""}</div>`).join("");
+  }
+  if(p.audit_questions.length){
+    h += `<div style="font-size:14px;font-weight:700;margin:14px 0 8px">❓ 실사 시 받는 질문</div>`;
+    h += p.audit_questions.map(q=>`<div class="qrow"><div class="q">Q. ${esc(q.q)}</div>${q.hint?`<div class="h">💡 ${esc(q.hint)}</div>`:""}</div>`).join("");
+  }
+  if(p.common_issues.length){
+    h += `<div style="font-size:14px;font-weight:700;margin:14px 0 8px">⚠️ 자주 발생하는 이슈</div>`;
+    h += `<div>`+p.common_issues.map(i=>`<span class="src-tag" style="margin-right:6px;display:inline-block;margin-bottom:6px">${esc(i.name)}</span>`).join("")+`</div>`;
+  }
+  if(p.related_sop_ids.length){
+    h += `<div style="font-size:14px;font-weight:700;margin:14px 0 8px">📁 관련 SOP</div>`;
+    h += p.related_sop_ids.map(s=>`<div style="font-size:13px">📄 <b>${esc(s)}</b></div>`).join("");
+  }
+  return h || `<div class="note">요약 정보가 없습니다.</div>`;
+}
+
+function renderMain(){
+  const p = byId(activeId);
+  const ck = getCk(activeId);
+  if(ck.length!==p.checklist.length){ /* init */ }
+  const done = p.checklist.filter((_,i)=>ck[i]).length;
+  const pct = p.checklist.length? Math.round(done/p.checklist.length*100):0;
+  const verBadge = p.verified
+    ? `<span class="pill" style="background:var(--green-soft);color:#047857">✅ 검증됨</span>`
+    : `<span class="pill" style="background:var(--amber-soft);color:#b45309">⚠ QA 검증 전 초안</span>`;
+  const tabs = ["액션 요약","규제 근거","가이드라인","참고·문서"];
+
+  document.getElementById("main").innerHTML = `
+    <div class="case-head">
+      <div class="case-title"><b>${esc(p.topic)}</b>
+        <span class="pill ${impClass(p.audit_impact)}">실사 영향 ${esc(p.audit_impact||'—')}</span>${verBadge}</div>
+      <div class="acts">
+        <button class="btn" onclick="saveRecord()">🔖 기록 저장</button>
+        <button class="btn primary" onclick="exportCapa()">📤 CAPA 내보내기</button>
+      </div>
+    </div>
+    <div class="summary">${esc(p.summary)}</div>
+    ${p.report_deadline?`<div class="deadline">⏱ <b>보고기한</b> · ${esc(p.report_deadline)}</div>`:""}
+
+    <div class="prog-row"><b>QA 액션</b>
+      <div class="prog"><i style="width:${pct}%"></i></div>
+      <span class="prog-pct">${done}/${p.checklist.length}</span></div>
+    <div id="cklist">${p.checklist.map((c,i)=>`
+      <label class="ck ${ck[i]?'done':''}">
+        <input type="checkbox" ${ck[i]?'checked':''} onchange="toggleCk(${i})">
+        <span><span class="a">${esc(c.action)}</span>${(c.detail||c.sop)?`<div class="d">${esc(c.detail||'')}${c.sop?` · 📄 ${esc(c.sop)}`:''}</div>`:''}</span>
+      </label>`).join("")}</div>
+
+    <div class="tabs">${tabs.map(t=>`<button class="tab ${t===activeTab?'active':''}" onclick="setTab('${t}')">${t}</button>`).join("")}</div>
+    <div id="tabbody">${tabBody(p)}</div>
+
+    <div class="foot">⚠️ 사람 검토 필요 — 고객 제출·실사 대응 전 담당자(QA·법무) 확인. · 데이터: 플레이북 시드 + law.go.kr 직링크</div>`;
+}
+
+function toggleCk(i){
+  const ck=getCk(activeId); const p=byId(activeId);
+  while(ck.length<p.checklist.length) ck.push(false);
+  ck[i]=!ck[i]; setCk(activeId,ck); renderMain();
+}
+function setTab(t){ activeTab=t; const p=byId(activeId);
+  document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active", b.textContent===t));
+  document.getElementById("tabbody").innerHTML=tabBody(p); }
+
+function saveRecord(){
+  const p=byId(activeId); const ck=getCk(activeId);
+  let recs; try{ recs=JSON.parse(localStorage.getItem("wb_records")||"[]"); }catch(e){ recs=[]; }
+  recs.unshift({topic:p.topic, ts:new Date().toISOString().slice(0,19).replace("T"," "),
+    done:p.checklist.filter((_,i)=>ck[i]).length, total:p.checklist.length});
+  localStorage.setItem("wb_records", JSON.stringify(recs.slice(0,200)));
+  refreshRecPill(); toast("✅ 기록에 저장했습니다 ("+recCount()+"건)");
+}
+
+function exportCapa(){
+  const p=byId(activeId); const ck=getCk(activeId);
+  const today=new Date().toISOString().slice(0,10);
+  let m = `# CAPA / 사안 기록 — ${p.topic}\n\n`;
+  m += `- 작성일: ${today}\n- 실사 영향: ${p.audit_impact||'-'}\n`;
+  if(p.report_deadline) m += `- 보고기한: ${p.report_deadline}\n`;
+  m += `\n## QA 액션 진행\n`;
+  p.checklist.forEach((c,i)=>{ m += `- [${ck[i]?'x':' '}] ${c.action}${c.detail?` — ${c.detail}`:''}${c.sop?` (${c.sop})`:''}\n`; });
+  m += `\n## 적용 규정 (효력 근거)\n`;
+  p.binding.forEach(r=>{ m += `- [${r.tier_label}] ${r.title}${r.sole?' (단독 인용 가능)':''}\n  ${r.url}\n`; });
+  if(p.guides.length){ m += `\n## 핵심 가이드라인\n`;
+    p.guides.forEach(r=>{ m += `- ${r.title}\n`; (r.key_points||[]).forEach(k=>m+=`  - ${k}\n`); m+=`  ${r.url}\n`; }); }
+  if(p.reference_links.length){ m += `\n## 참고 문서\n`;
+    p.reference_links.forEach(rl=>m+=`- ${rl.title} (${rl.source}) — ${rl.url}\n`); }
+  m += `\n---\n⚠️ 사람 검토 필요 — 고객 제출·실사 대응 전 담당자(QA·법무) 확인.\n`;
+  const blob=new Blob([m],{type:"text/markdown;charset=utf-8"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
+  a.download=`CAPA_${p.id}_${today}.md`; a.click(); URL.revokeObjectURL(a.href);
+  toast("📤 CAPA 초안을 내보냈습니다");
+}
+
+renderRail(); renderMain(); refreshRecPill();
+</script>
+</body>
+</html>

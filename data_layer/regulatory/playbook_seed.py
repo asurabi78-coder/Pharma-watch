@@ -33,8 +33,20 @@ TEMP_EXCURSION = TopicPlaybook(
         "보관·운송 중 허용 온도 범위를 벗어난 상황. 콜드체인 3PL 에서 가장 빈번하고, "
         "위탁자 통보 기한·격리·CAPA 가 한 묶음으로 걸린다."
     ),
+    overview=(
+        "콜드체인은 의약품을 제조부터 환자 전달까지 규정 온도(2~8℃ 냉장, −20℃ 이하 냉동 등)로 "
+        "유지·운송하는 체계다. 「약사법」과 그 하위 「의약품 등의 안전 및 품질관리에 관한 규정」(KGSP)이 "
+        "보관·운송 품질의 법적 근거이며, 생물학적제제는 별도 관리 규칙이 추가 적용된다."
+    ),
     aliases=["온도이탈", "온도 일탈", "일탈", "excursion", "콜드체인", "보관 온도", "온도"],
     reg_refs=[
+        RegRef(
+            title="약사법",
+            tier=SourceTier.LAW,
+            article="의약품 유통·품질관리의 모법(母法)",
+            url=_LAW + "약사법",
+            provenance=Provenance.AUTO,
+        ),
         RegRef(
             title="의약품 등의 안전 및 품질관리에 관한 규정 — 보관 관리",
             tier=SourceTier.LAW,
@@ -156,6 +168,11 @@ RELEASE_CERT = TopicPlaybook(
     id="release_cert",
     topic="출하증명",
     summary="의약품 출하 시 출하증명서 발행·보관. 위탁 3PL 의 책임 구조가 SLA 와 얽힌다.",
+    overview=(
+        "출하증명서는 의약품 출하 시 제품명·제조번호·유효기간·보관/운송조건·책임자를 기재해 발행하는 "
+        "품질 증빙 문서다. 「약사법」과 KGSP 가 근거이며, 위탁 3PL 은 위탁자(제약사) 명의로 발행하되 "
+        "책임 구조를 SLA 에 명시한다."
+    ),
     aliases=["출하증명", "출하증명서", "release certificate"],
     web_query="의약품 출하증명서",
     reg_refs=[
@@ -196,9 +213,28 @@ VACCINE_BRC = TopicPlaybook(
     id="vaccine_brc",
     topic="백신·생물학적제제",
     summary="생물학적제제의 출하·회수·온도관리. BRC(배치기록) 관리와 출하증명서 보관이 핵심.",
+    overview=(
+        "생물학적제제(백신 등)는 콜드체인 보관·운송에 더해 배치기록(BRC) 관리·회수·출하증명 보관이 "
+        "핵심이다. 「약사법」과 「생물학적 제제 등의 제조ㆍ판매관리 규칙」(총리령) 등이 적용된다."
+    ),
     aliases=["백신", "생물학적제제", "BRC", "회수", "생물학적"],
     web_query="백신 생물학적제제 콜드체인",
     reg_refs=[
+        RegRef(
+            title="약사법",
+            tier=SourceTier.LAW,
+            article="의약품 유통·품질관리의 모법(母法)",
+            url=_LAW + "약사법",
+            provenance=Provenance.AUTO,
+        ),
+        RegRef(
+            title="생물학적 제제 등의 제조ㆍ판매관리 규칙",
+            tier=SourceTier.LAW,
+            article="총리령 · 시행 2023-02-20",
+            url=_LAW + "생물학적 제제 등의 제조ㆍ판매관리 규칙",
+            effective_date="2023-02-20",
+            provenance=Provenance.AUTO,
+        ),
         RegRef(
             title="의약품 등의 안전 및 품질관리에 관한 규정 — 보관 관리",
             tier=SourceTier.LAW,

@@ -146,12 +146,8 @@ def _badge(text: str, fg: str, bg: str) -> str:
 
 
 def _render_playbook(pb: TopicPlaybook):
-    impact_fg, impact_bg = {
-        "높음": ("#A32D2D", "#FCEBEB"),
-        "중간": ("#854F0B", "#FAEEDA"),
-        "낮음": ("#5F5E5A", "#F1EFE8"),
-    }.get(pb.audit_impact, ("#5F5E5A", "#F1EFE8"))
-
+    """레퍼런스 파인더 — 주제의 적용 법령·고시·가이드라인·참고문서를 찾아 보여준다.
+    (업무 처리용 체크리스트·이슈·SOP·실사질문·보고기한은 이 페이지에서 다루지 않는다.)"""
     verified = bool(pb.last_reviewed_by)
     ver_badge = (
         _badge(f"✅ 검증 · {pb.last_reviewed_by}", "#0F6E56", "#E1F5EE")
@@ -160,50 +156,49 @@ def _render_playbook(pb: TopicPlaybook):
     )
 
     st.markdown(f"### {pb.topic}")
-    st.markdown(
-        _badge(f"실사 영향 {pb.audit_impact or '—'}", impact_fg, impact_bg)
-        + " &nbsp; " + ver_badge,
-        unsafe_allow_html=True,
-    )
-    if pb.summary:
-        st.caption(pb.summary)
+    st.markdown(ver_badge, unsafe_allow_html=True)
+
+    # 개요
+    overview = pb.overview or pb.summary
+    if overview:
+        st.markdown("**개요**")
+        st.info(overview)
 
     unverified = pb.unverified_items()
     if unverified:
         st.warning(
-            "⚠️ 아래 중 사람 검증 전(AI 초안) 항목이 있습니다 — 사용 전 확인 필요:\n\n"
+            "⚠️ 사람 검증 전(AI 초안) 항목 있음 — 사용 전 확인 필요:\n\n"
             + "\n".join(f"- {u}" for u in unverified)
         )
 
-    if pb.report_deadline:
-        st.error(f"⏱ **보고기한** — {pb.report_deadline}")
-
-    if pb.checklist:
-        st.markdown("#### ☑️ QA 액션 체크리스트")
-        for i, c in enumerate(pb.checklist):
-            st.checkbox(c.action, key=f"reg_ck_{pb.id}_{i}")
-            sub = c.detail
-            if c.related_sop_id:
-                sub += f" · 📄 {c.related_sop_id}"
-            if c.provenance is Provenance.AI_DRAFT:
-                sub += "  ·  ⚠ AI 초안"
-            if sub.strip():
-                st.caption(sub)
-
-    binding = [r for r in pb.reg_refs if r.tier in (SourceTier.LAW, SourceTier.NOTICE, SourceTier.INTERNAL)]
+    laws = [r for r in pb.reg_refs if r.tier in (SourceTier.LAW, SourceTier.INTERNAL)]
+    notices = [r for r in pb.reg_refs if r.tier == SourceTier.NOTICE]
     guides = [r for r in pb.reg_refs if r.tier == SourceTier.GUIDE]
 
-    if binding:
-        st.markdown("#### ① 관련 규제현황")
-        st.caption("뱃지 = 효력 축(단독 근거 인용 가능 여부). 원문은 law.go.kr 로 직접 이동.")
-        for ref in binding:
+    if laws:
+        st.markdown("#### ⚖️ 법적 근거 (법령)")
+        for ref in laws:
+            _render_ref_card(ref)
+
+    if notices:
+        st.markdown("#### 📋 관련 고시")
+        for ref in notices:
             _render_ref_card(ref)
 
     if guides:
-        st.markdown("#### ② 핵심 가이드라인")
+        st.markdown("#### 📘 가이드라인")
         st.caption("법적 의무는 아니나 인증·실사 시 적용되는 국제/국내 가이드라인 요지.")
         for ref in guides:
             _render_ref_card(ref)
+
+    # 🔎 law.go.kr 관련 법령·고시 더 찾기 (on-demand 버튼)
+    st.markdown("#### 🔎 law.go.kr 에서 관련 법령·고시 더 찾기")
+    q = pb.web_query or pb.topic
+    done_key = f"reg_live_done_{pb.id}"
+    if st.button(f"🔍 '{q}' 관련 법령·고시 검색", key=f"reg_live_{pb.id}"):
+        st.session_state[done_key] = True
+    if st.session_state.get(done_key):
+        _render_live_law(q)
 
     if pb.recent_changes:
         st.markdown("#### 📅 최근·예정 개정")
@@ -213,30 +208,7 @@ def _render_playbook(pb: TopicPlaybook):
                 msg += f"  [원문 ↗]({c.url})"
             st.warning(msg)
 
-    col_iss, col_sop = st.columns(2)
-    with col_iss:
-        if pb.common_issues:
-            st.markdown("#### ⚠️ 자주 발생하는 이슈")
-            for issue in pb.common_issues:
-                kw = issue.keyword or issue.name
-                if st.button(f"🔍 {issue.name}", key=f"reg_iss_{pb.id}_{issue.name}"):
-                    st.session_state["reg_topic"] = None
-                    st.session_state["reg_query"] = kw
-                    st.rerun()
-    with col_sop:
-        if pb.related_sop_ids:
-            st.markdown("#### 📁 관련 SOP")
-            for sid in pb.related_sop_ids:
-                st.markdown(f"- 📄 **{sid}**")
-
-    if pb.audit_questions:
-        st.markdown("#### ❓ 실사 시 받는 질문 (사전 점검)")
-        for q in pb.audit_questions:
-            st.markdown(f"**Q. {q.question}**")
-            if q.hint:
-                st.caption(f"💡 {q.hint}")
-
-    st.markdown("#### ③ 참고 사이트·문서")
+    st.markdown("#### 📄 참고 사이트·문서")
     if pb.reference_links:
         for rl in pb.reference_links:
             src = f" · {rl.source}" if rl.source else ""
@@ -251,6 +223,59 @@ def _render_playbook(pb: TopicPlaybook):
 
     st.divider()
     st.caption("⚠️ 사람 검토 필요 — 고객 제출·실사 대응 전 담당자(QA·법무) 확인.")
+
+
+def _current_ip() -> str:
+    """현재 공인 IP (law.go.kr IP 등록 안내용). 실패 시 빈 문자열."""
+    try:
+        import requests
+        return requests.get("https://api.ipify.org", timeout=3).text.strip()
+    except Exception:  # noqa: BLE001
+        return ""
+
+
+def _render_live_law(query: str):
+    """law.go.kr 실시간 — 법령 + 행정규칙. 막히면 IP 등록 안내(현재 공인 IP 표시)."""
+    connector = LawGoKrConnector()
+    if not connector.is_available():
+        st.caption("ℹ️ `LAW_GO_KR_API_KEY` 미설정 — .env 에 발급 ID 를 넣으면 자동 활성화.")
+        return
+
+    with st.spinner("law.go.kr 조회 중..."):
+        records = list(connector.search_laws(query, max_results=8))
+        try:
+            records += list(connector.search_admrules(query, max_results=8))
+        except Exception:  # noqa: BLE001
+            pass
+
+    seen, uniq = set(), []
+    for r in records:
+        if r.id in seen:
+            continue
+        seen.add(r.id)
+        uniq.append(r)
+
+    if uniq:
+        st.success(f"law.go.kr {len(uniq)}건 — 공식 법령·고시 (원문 직링크)")
+        for rec in uniq:
+            tier = rec.tier if isinstance(rec.tier, SourceTier) else SourceTier.LAW
+            label, _ = TIER_LABEL[tier]
+            st.markdown(f"- {label} **{rec.title}**")
+            cap = rec.summary or ""
+            if rec.url:
+                cap += f"  ·  [원문 보기]({rec.url})"
+            if cap.strip():
+                st.caption(cap)
+        return
+
+    # 결과 없음 → IP 차단 가능성 안내
+    ip = _current_ip()
+    st.warning(
+        "결과가 없거나 **law.go.kr 인증이 막혔을 수 있어요.**\n\n"
+        + (f"현재 공인 IP: **{ip}**\n\n" if ip else "")
+        + "유동 IP 가 바뀌면 차단됩니다 → open.law.go.kr 마이페이지 → 신청 수정 → "
+        "**서버 IP주소**에 위 IP 를 추가 등록하세요."
+    )
 
 
 def _render_ref_card(ref):
