@@ -4,6 +4,7 @@ PharmaCal Pro UI(HTML/CSS/JS)를 그대로 임베드한다. UI 는 원본 그대
 실데이터(법제처/식약처 크롤링) 연동은 후속 단계에서 /api 로 주입 예정.
 현재는 정적 샘플 데이터 기반 데모.
 """
+import re
 from pathlib import Path
 
 import streamlit as st
@@ -35,5 +36,18 @@ def render():
             "앱 최상단(app.py 옆)에 pharmacal-pro.html 이 있는지 확인하세요."
         )
         return
+
+    # 선택한 테마에 맞춰 캘린더 색 변수 교체 (액센트/헤더만; 카테고리색·밝은 표면 유지)
+    try:
+        from ui.theme import active_calendar_overrides
+        for _var, _val in active_calendar_overrides().items():
+            html = re.sub(
+                r"(--" + re.escape(_var) + r":\s*)[^;]+;",
+                r"\g<1>" + _val + ";",
+                html,
+                count=1,
+            )
+    except Exception:
+        pass
 
     components.html(html, height=1180, scrolling=True)

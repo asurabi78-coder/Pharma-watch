@@ -32,13 +32,111 @@ TOKENS = {
 }
 
 
+from pathlib import Path
+
+# ── 테마 프리셋 (그날그날 기분대로 — 사이드바에서 선택) ──────────────
+# 모든 테마는 TOKENS 와 동일한 키를 가진다. 레이아웃은 동일하고 색만 교체.
+THEMES = {
+    "네이비 (기본)": dict(TOKENS),
+    "인디고 라이트": {
+        "bg_0": "#EEF1F8", "bg_1": "#FFFFFF", "bg_2": "#FFFFFF",
+        "border": "#E4E8F2", "border_strong": "#D9DEEC",
+        "text": "#1E2333", "text_2": "#5B6178", "text_3": "#9AA0B5",
+        "accent": "#6D5EF6", "accent_soft": "#ECEAFE",
+        "qa": "#12B5A5", "qa_soft": "#DFF6F2",
+        "warn": "#C0790F", "warn_soft": "#FDF0DC",
+        "danger": "#D8453E", "danger_soft": "#FBE7E6",
+    },
+    "딥그린 라이트": {
+        "bg_0": "#FAFBFA", "bg_1": "#FFFFFF", "bg_2": "#FFFFFF",
+        "border": "#E8ECE9", "border_strong": "#DCE3DE",
+        "text": "#18211C", "text_2": "#5D6B63", "text_3": "#93A099",
+        "accent": "#0E7C5A", "accent_soft": "#E4F1EA",
+        "qa": "#0E7C5A", "qa_soft": "#E4F1EA",
+        "warn": "#B8730E", "warn_soft": "#FBEFD9",
+        "danger": "#C7433C", "danger_soft": "#FAE6E5",
+    },
+    "소프트 네이비": {
+        "bg_0": "#18203A", "bg_1": "#1E2746", "bg_2": "#243054",
+        "border": "#2E3A5E", "border_strong": "#3A4870",
+        "text": "#EAEEF8", "text_2": "#9AA6C4", "text_3": "#6E7BA0",
+        "accent": "#34D6C8", "accent_soft": "#143C44",
+        "qa": "#34D6C8", "qa_soft": "#143C44",
+        "warn": "#F5B45A", "warn_soft": "#3D3017",
+        "danger": "#F08A82", "danger_soft": "#3D2020",
+    },
+}
+
+# 규제 캘린더(PharmaCal HTML)의 색 변수 override — 액센트/헤더만 교체,
+# 카테고리색(법령/식약처/뉴스/마감)과 밝은 표면은 유지해 가독성 보존.
+CAL_OVERRIDES = {
+    "네이비 (기본)": {},
+    "인디고 라이트": {
+        "teal": "#6D5EF6", "teal-bright": "#8B7CF8", "teal-glow": "rgba(109,94,246,0.35)",
+        "navy-900": "#1E1B3A", "navy-800": "#2A2550", "navy-700": "#352E66",
+    },
+    "딥그린 라이트": {
+        "teal": "#0E7C5A", "teal-bright": "#13A372", "teal-glow": "rgba(14,124,90,0.32)",
+        "navy-900": "#0E2A20", "navy-800": "#11392B", "navy-700": "#154A38",
+    },
+    "소프트 네이비": {
+        "teal": "#34D6C8", "teal-bright": "#5FE6DA", "teal-glow": "rgba(52,214,200,0.35)",
+        "navy-900": "#10182E", "navy-800": "#18203A", "navy-700": "#222C49",
+    },
+}
+
+_DEFAULT_THEME = "네이비 (기본)"
+_PREF_PATH = Path(__file__).resolve().parent.parent / "db" / "ui_theme.txt"
+
+
+def _load_pref() -> str:
+    try:
+        v = _PREF_PATH.read_text(encoding="utf-8").strip()
+        return v if v in THEMES else _DEFAULT_THEME
+    except Exception:
+        return _DEFAULT_THEME
+
+
+def _save_pref(name: str) -> None:
+    try:
+        _PREF_PATH.parent.mkdir(parents=True, exist_ok=True)
+        _PREF_PATH.write_text(name, encoding="utf-8")
+    except Exception:
+        pass
+
+
+def get_active_theme_key() -> str:
+    return st.session_state.get("ui_theme") or _load_pref()
+
+
+def get_active_tokens() -> dict:
+    return THEMES.get(get_active_theme_key(), THEMES[_DEFAULT_THEME])
+
+
+def active_calendar_overrides() -> dict:
+    """현재 테마의 캘린더 색 override (pages/pharmacal.py 에서 사용)."""
+    return CAL_OVERRIDES.get(get_active_theme_key(), {})
+
+
+def render_theme_picker() -> None:
+    """사이드바 테마 선택. 변경 시 저장 + 즉시 재적용."""
+    keys = list(THEMES.keys())
+    cur = get_active_theme_key()
+    idx = keys.index(cur) if cur in keys else 0
+    sel = st.selectbox("🎨 테마", keys, index=idx, key="ui_theme_select")
+    if sel != cur:
+        st.session_state["ui_theme"] = sel
+        _save_pref(sel)
+        st.rerun()
+
+
 def _sanitize_css_for_style_tag(css: str) -> str:
     return css.replace("</style", "<\\/style")
 
 
 def inject_dark_theme():
-    """다크 네이비 테마 + 타이포 + Streamlit 위젯 오버라이드."""
-    t = TOKENS
+    """선택된 테마 + 타이포 + Streamlit 위젯 오버라이드."""
+    t = get_active_tokens()
     css = f"""
 :root {{
     --bg-0: {t['bg_0']};

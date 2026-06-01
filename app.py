@@ -35,6 +35,16 @@ try:
 except Exception:
     pass
 
+# 외부 배포용 로그인 게이트 — ENABLE_AUTH=1 일 때만 동작 (로컬은 기본 통과).
+# import 만 보호하고 호출은 보호하지 않는다 (st.stop() 이 정상 전파되도록).
+_require_login = None
+try:
+    from ui.auth import require_login as _require_login
+except Exception:
+    _require_login = None
+if _require_login:
+    _require_login()
+
 
 # 외부 공개 메뉴 — KEEP 만. 내부 메뉴(원가/전략/제안서/회의실)는 존재하지 않음.
 PAGES = {
@@ -96,6 +106,18 @@ with st.sidebar:
     st.caption("상위 플랜에서 잠금 해제")
 
     st.markdown("---")
+    try:
+        from ui.theme import render_theme_picker
+        render_theme_picker()
+    except Exception:
+        pass
+
+    try:
+        from ui.auth import logout_button
+        logout_button()
+    except Exception:
+        pass
+
     st.caption(branding.ORG_LABEL)
     st.caption(branding.FOOTER_NOTE)
 

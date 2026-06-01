@@ -13,6 +13,7 @@ venv/
 
 # Databases / generated data
 *.db
+db/ui_theme.txt
 
 # Misc
 _bashtest.txt
