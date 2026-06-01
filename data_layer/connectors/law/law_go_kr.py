@@ -15,6 +15,7 @@ import logging
 import os
 from pathlib import Path
 from typing import List, Optional
+from urllib.parse import quote
 
 import requests
 from dotenv import load_dotenv
@@ -40,6 +41,15 @@ def _fmt_date(yyyymmdd: str) -> str:
     if len(s) == 8 and s.isdigit():
         return f"{s[:4]}-{s[4:6]}-{s[6:8]}"
     return s
+
+
+def _human_law_url(kind: str, title: str) -> str:
+    """사람이 여는 law.go.kr permalink. DRF API 엔드포인트(OC 키 노출/본문 미신청 위험)
+    대신 사용한다. kind="법령" / "행정규칙". 제목 비면 메인으로 폴백."""
+    title = (title or "").strip()
+    if not title:
+        return "https://www.law.go.kr"
+    return f"https://www.law.go.kr/{quote(kind)}/{quote(title)}"
 
 
 def _sanitize_for_log(text: str) -> str:
@@ -233,12 +243,8 @@ class LawGoKrConnector(Connector):
             title = (item.get("법령명한글") or "").strip()
             if not title:
                 continue
-            link = (item.get("법령상세링크") or "").strip()
-            url = (
-                f"https://www.law.go.kr{link}"
-                if link.startswith("/")
-                else link
-            )
+            # 표시용 링크는 사람용 permalink (DRF API 주소는 raw 에 보존).
+            url = _human_law_url("법령", title)
             promulgated = _fmt_date(item.get("공포일자", ""))
             enforced = _fmt_date(item.get("시행일자", ""))
             ministry = (item.get("소관부처명") or "").strip()
@@ -291,12 +297,8 @@ class LawGoKrConnector(Connector):
             title = (item.get("행정규칙명") or "").strip()
             if not title:
                 continue
-            link = (item.get("행정규칙상세링크") or "").strip()
-            url = (
-                f"https://www.law.go.kr{link}"
-                if link.startswith("/")
-                else link
-            )
+            # 표시용 링크는 사람용 permalink (DRF API 주소는 raw 에 보존).
+            url = _human_law_url("행정규칙", title)
             issued = _fmt_date(item.get("발령일자", ""))
             enforced = _fmt_date(item.get("시행일자", ""))
             agency = (item.get("발령기관명") or "").strip()
