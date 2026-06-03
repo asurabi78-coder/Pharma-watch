@@ -104,6 +104,13 @@ def render() -> None:
                     summary = fetch_and_save(per_source_limit=int(per_src))
                 st.session_state["newsroom_last_summary"] = summary
                 st.session_state["newsroom_last_fetched"] = datetime.now()
+                try:
+                    from data_layer import usage as _usage
+                    from ui.auth import current_user as _cur
+                    _usage.log_action(_cur(), "newsroom", "재수집",
+                                      f"{summary.get('total_fetched', 0)}건")
+                except Exception:
+                    pass
                 st.rerun()
         with bcols[1]:
             if st.button("🗑 30일 이전 삭제", use_container_width=True, key="newsroom_purge"):

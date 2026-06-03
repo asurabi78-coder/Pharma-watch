@@ -104,6 +104,17 @@ def _route(term: str):
     if not term:
         return
     matched = get_playbook(term)
+    # 사용량 기록 — 무엇을 찾는지(주제선택/키워드검색 + 검색어)
+    try:
+        from data_layer import usage as _usage
+        from ui.auth import current_user as _cur
+        _usage.log_action(
+            _cur(), "regulatory",
+            "주제선택" if matched is not None else "키워드검색",
+            term,
+        )
+    except Exception:
+        pass
     if matched is not None:
         st.session_state["reg_topic"] = matched.id
         st.session_state["reg_query"] = ""

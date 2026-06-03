@@ -17,6 +17,29 @@ def auth_enabled() -> bool:
     return os.getenv("ENABLE_AUTH", "").strip().lower() in ("1", "true", "yes", "on")
 
 
+def current_user() -> str:
+    """현재 로그인 계정 ID. 로그인 미사용(로컬)이면 '(local)'."""
+    return st.session_state.get("pw_auth") or "(local)"
+
+
+def _admin_ids() -> set:
+    """관리자 계정 목록. 환경변수 PHARMA_WATCH_ADMINS='id1,id2' 로 지정."""
+    raw = os.getenv("PHARMA_WATCH_ADMINS", "").strip()
+    return {x.strip() for x in raw.split(",") if x.strip()}
+
+
+def is_admin() -> bool:
+    """관리자 여부.
+    - 로그인 미사용(로컬 개발) → 항상 True (편의).
+    - 로그인 사용 시 → PHARMA_WATCH_ADMINS 에 포함된 계정만 True.
+      (ADMINS 미설정이면, 관리자 페이지는 아무에게도 안 보임.)
+    """
+    if not auth_enabled():
+        return True
+    uid = st.session_state.get("pw_auth")
+    return bool(uid) and uid in _admin_ids()
+
+
 def _load_users() -> dict:
     raw = os.getenv("PHARMA_WATCH_USERS", "").strip()
     users: dict = {}

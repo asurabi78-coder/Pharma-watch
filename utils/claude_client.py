@@ -24,8 +24,26 @@ def get_client() -> "anthropic.Anthropic":
     return anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
 
-def call_claude(system: str, messages: list, max_tokens: int = 900) -> str:
-    """system + messages 로 단일 호출. 실패해도 문자열을 보장한다."""
+def _log_usage(resp, feature: str = "") -> None:
+    """응답의 토큰 사용량을 현재 로그인 계정 기준으로 기록. 실패는 무시(앱 흐름 보호)."""
+    try:
+        usage = getattr(resp, "usage", None)
+        in_tok = int(getattr(usage, "input_tokens", 0) or 0)
+        out_tok = int(getattr(usage, "output_tokens", 0) or 0)
+        account = st.session_state.get("pw_auth") or "(local)"
+        feat = feature or st.session_state.get("page") or "qa_analyst"
+        from data_layer import usage as usage_repo
+        usage_repo.log_claude(account, feat, MODEL, in_tok, out_tok)
+    except Exception:
+        pass
+
+
+def call_claude(system: str, messages: list, max_tokens: int = 900,
+                feature: str = "") -> str:
+    """system + messages 로 단일 호출. 실패해도 문자열을 보장한다.
+
+    feature: 사용량 집계용 기능 이름(미지정 시 현재 페이지로 추정).
+    """
     if not os.getenv("ANTHROPIC_API_KEY"):
         return "ANTHROPIC_API_KEY 가 설정되지 않았습니다. .env 에 키를 추가하면 분석이 활성화됩니다."
     try:
@@ -35,6 +53,7 @@ def call_claude(system: str, messages: list, max_tokens: int = 900) -> str:
             messages=messages,
             max_tokens=max_tokens,
         )
+        _log_usage(resp, feature)
         text = "".join(
             getattr(b, "text", "") for b in resp.content
             if getattr(b, "type", "") == "text"

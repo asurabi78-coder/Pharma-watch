@@ -53,7 +53,15 @@ def render():
                         system=_load_prompt(),
                         messages=[{"role": "user", "content": text.strip()}],
                         max_tokens=900,
+                        feature="qa_analyst",
                     )
+                # 분석 실행 행동 기록 (토큰은 call_claude 내부에서 별도 기록)
+                try:
+                    from data_layer import usage as _usage
+                    from ui.auth import current_user as _cur
+                    _usage.log_action(_cur(), "qa_analyst", "영향도분석", text.strip()[:80])
+                except Exception:
+                    pass
                 # 결과를 세션에 보관(삭제 등 rerun 후에도 유지) + 기록 자동 저장
                 st.session_state["qa_last_q"] = text.strip()
                 st.session_state["qa_last_a"] = out

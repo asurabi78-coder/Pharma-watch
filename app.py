@@ -53,7 +53,11 @@ PAGES = {
     "newsroom":   ["뉴스 모니터링", "pages.newsroom"],
     "regulatory": ["규제 검색",     "pages.regulatory"],
     "qa_analyst": ["QA 분석가",     "pages.qa_analyst"],
+    "usage":      ["사용량",        "pages.usage"],  # 관리자 전용 — 메뉴는 아래에서 별도 노출
 }
+
+# 일반 메뉴에 표시하지 않는 페이지 (관리자 전용 등)
+_HIDDEN_FROM_MENU = {"usage"}
 
 # 상위(유료) 기능 — 화면엔 보이되 잠금. (원칙 5·6)
 LOCKED = ["SOP 자동비교", "CAPA 자동작성", "대화형 QA 질의"]
@@ -64,7 +68,7 @@ if "page" not in st.session_state:
 
 
 def _go(key: str) -> None:
-    """페이지 이동 + 뒤로가기용 히스토리 기록."""
+    """페이지 이동 + 뒤로가기용 히스토리 기록. (조회 기록은 라우터에서 일괄 처리)"""
     cur = st.session_state.get("page")
     if cur and cur != key:
         st.session_state.setdefault("nav_history", []).append(cur)
@@ -97,7 +101,17 @@ with st.sidebar:
 
     st.caption("메뉴")
     for k, info in PAGES.items():
+        if k in _HIDDEN_FROM_MENU:
+            continue
         _nav_button(k, info[0])
+
+    # 관리자 전용 — 사용량 메뉴
+    try:
+        from ui.auth import is_admin as _is_admin
+        if _is_admin():
+            _nav_button("usage", "📊 사용량")
+    except Exception:
+        pass
 
     st.markdown("---")
     st.caption("프리미엄 🔒")
@@ -124,5 +138,17 @@ with st.sidebar:
 
 page = st.session_state.get("page", "home")
 info = PAGES.get(page, PAGES["home"])
+
+# 페이지 조회 기록 — 페이지가 바뀐 시점에만 1회 (rerun 중복 방지).
+# 사이드바·홈타일·뒤로가기 등 모든 진입 경로를 라우터 한 곳에서 일관되게 잡는다.
+if st.session_state.get("_last_logged_page") != page:
+    try:
+        from data_layer import usage as _usage
+        from ui.auth import current_user as _cur
+        _usage.log_feature(_cur(), page)
+    except Exception:
+        pass
+    st.session_state["_last_logged_page"] = page
+
 mod = importlib.import_module(info[1])
 mod.render()
