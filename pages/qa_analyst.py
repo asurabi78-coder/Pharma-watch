@@ -9,9 +9,11 @@
 from pathlib import Path
 
 import streamlit as st
+import streamlit.components.v1 as components
 
 import branding
 from data_layer import qa_history
+from ui import theme as _theme
 
 _PROMPT_PATH = Path(__file__).parent.parent / "prompts" / "regulatory_qa_analyst.md"
 
@@ -27,8 +29,108 @@ def _load_prompt() -> str:
         )
 
 
+# ── 제목 아이콘 (A · 뉴럴 코어) — 테마 색 자동 연동 ──────────────
+_TITLE_HTML = """
+<div style="display:flex;align-items:center;gap:13px;margin:0 0 2px;">
+  <svg width="44" height="44" viewBox="0 0 100 100" style="flex:0 0 auto;" aria-hidden="true">
+    <polygon points="50,8 86,29 86,71 50,92 14,71 14,29" fill="none"
+             stroke="var(--qa)" stroke-width="4" stroke-linejoin="round"/>
+    <g stroke="var(--qa)" stroke-width="2" opacity="0.45">
+      <line x1="50" y1="50" x2="50" y2="30"/><line x1="50" y1="50" x2="34" y2="44"/>
+      <line x1="50" y1="50" x2="66" y2="44"/><line x1="50" y1="50" x2="38" y2="66"/>
+      <line x1="50" y1="50" x2="62" y2="66"/><line x1="34" y1="44" x2="50" y2="30"/>
+      <line x1="66" y1="44" x2="50" y2="30"/>
+    </g>
+    <g fill="var(--accent)">
+      <circle cx="50" cy="30" r="3.6"/><circle cx="34" cy="44" r="3.6"/>
+      <circle cx="66" cy="44" r="3.6"/><circle cx="38" cy="66" r="3.6"/>
+      <circle cx="62" cy="66" r="3.6"/>
+    </g>
+    <circle cx="50" cy="50" r="6.5" fill="var(--bg-1)" stroke="var(--qa)" stroke-width="3"/>
+  </svg>
+  <span style="font-family:'DM Serif Display','Noto Serif KR',serif;font-size:2.3rem;
+               font-weight:400;color:var(--text);letter-spacing:-0.01em;line-height:1.1;">QA 분석가</span>
+</div>
+"""
+
+
+def _hex_lum(h: str) -> float:
+    h = h.lstrip("#")
+    if len(h) != 6:
+        return 0.0
+    r = int(h[0:2], 16)
+    g = int(h[2:4], 16)
+    b = int(h[4:6], 16)
+    return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255
+
+
+# 뉴럴 컨스텔레이션 로딩 — 테마(밝음/어두움)에 따라 색·배경 자동 전환.
+_LOADER_TEMPLATE = """<!doctype html><html><head><meta charset='utf-8'><style>
+html{background:transparent;}
+body{margin:0;font-family:'Noto Sans KR',system-ui,sans-serif;}
+.pwpanel{background:__BG__;border:1px solid __BORDER__;border-radius:12px;overflow:hidden;padding-bottom:6px;}
+</style></head><body>
+<div class="pwpanel">
+<canvas id="pwl" style="width:100%;height:150px;display:block;"></canvas>
+<div style="text-align:center;font-size:12px;letter-spacing:.2em;color:__QA__;padding:2px 0 4px;">QA 영향도 분석 중</div>
+</div>
+<script>
+(function(){
+var DARK=__DARK__,QA='__QA__',AC='__AC__';
+var cv=document.getElementById('pwl'),ctx=cv.getContext('2d');
+var H=150,dpr=Math.min(window.devicePixelRatio||1,2),W=420,N=40,pts=[],edges=[],ripples=[],start=performance.now();
+function build(){
+  W=cv.clientWidth||420;cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);
+  pts=[];var cx=W/2,cy=H/2,Rx=Math.min(W*0.42,260),Ry=H*0.42;
+  for(var i=0;i<N;i++){var r=Math.sqrt((i+0.5)/N),th=i*2.39996;
+    pts.push({bx:cx+r*Rx*Math.cos(th),by:cy+r*Ry*Math.sin(th),ph:Math.random()*6.28,sp:0.35+Math.random()*0.4,am:1.6+Math.random()*2.4,x:0,y:0});}
+  edges=[];var th2=Math.min(W,H*1.6)*0.2;
+  for(var a=0;a<N;a++)for(var b=a+1;b<N;b++){var dx=pts[a].bx-pts[b].bx,dy=pts[a].by-pts[b].by,dd=Math.sqrt(dx*dx+dy*dy);if(dd<th2)edges.push({a:a,b:b,w:1-dd/th2});}
+}
+function draw(now){
+  var t=(now-start)/1000,cx=W/2,cy=H/2;ctx.clearRect(0,0,W,H);
+  for(var i=0;i<N;i++){var p=pts[i];p.x=p.bx+Math.cos(t*p.sp+p.ph)*p.am;p.y=p.by+Math.sin(t*p.sp*1.1+p.ph)*p.am;}
+  if(ripples.length===0||t-ripples[ripples.length-1].t0>2.9)ripples.push({t0:t});
+  ripples=ripples.filter(function(r){return t-r.t0<2.8;});
+  function glow(px,py){var g=0,dist=Math.sqrt((px-cx)*(px-cx)+(py-cy)*(py-cy));
+    for(var k=0;k<ripples.length;k++){var age=t-ripples[k].t0,wf=age*120,b=Math.max(0,1-Math.abs(dist-wf)/42)*Math.max(0,1-age/2.8);if(b>g)g=b;}return g;}
+  ctx.lineCap='round';
+  for(var e=0;e<edges.length;e++){var E=edges[e],A=pts[E.a],B=pts[E.b],gg=glow((A.x+B.x)/2,(A.y+B.y)/2);
+    if(DARK){ctx.globalAlpha=(0.045+0.32*gg)*E.w;ctx.strokeStyle=gg>0.25?'#9af0e6':QA;ctx.lineWidth=gg>0.4?1.3:0.7;}
+    else{ctx.globalAlpha=(0.10+0.42*gg)*E.w;ctx.strokeStyle=gg>0.3?AC:QA;ctx.lineWidth=gg>0.4?1.2:0.7;}
+    ctx.beginPath();ctx.moveTo(A.x,A.y);ctx.lineTo(B.x,B.y);ctx.stroke();}
+  ctx.globalAlpha=1;
+  for(var n=0;n<N;n++){var p=pts[n],gg=glow(p.x,p.y);
+    if(DARK){ctx.shadowBlur=5+13*gg;ctx.shadowColor=gg>0.3?'#bafff5':AC;ctx.fillStyle=gg>0.3?'#dffffb':QA;ctx.globalAlpha=0.45+0.55*gg;
+      ctx.beginPath();ctx.arc(p.x,p.y,1.4+2.2*gg,0,6.2832);ctx.fill();}
+    else{if(gg>0.08){ctx.globalAlpha=0.16*gg;ctx.fillStyle=QA;ctx.beginPath();ctx.arc(p.x,p.y,3+7*gg,0,6.2832);ctx.fill();}
+      ctx.globalAlpha=0.3+0.6*gg;ctx.fillStyle=gg>0.45?AC:QA;ctx.beginPath();ctx.arc(p.x,p.y,1.4+1.8*gg,0,6.2832);ctx.fill();}}
+  ctx.shadowBlur=0;ctx.globalAlpha=1;requestAnimationFrame(draw);
+}
+build();if(window.ResizeObserver)new ResizeObserver(build).observe(cv);requestAnimationFrame(draw);
+})();
+</script></body></html>"""
+
+
+def _loader_html() -> str:
+    t = _theme.get_active_tokens()
+    bg = t.get("bg_1", "#10141f")
+    border = t.get("border", "#1f2940")
+    qa = t.get("qa", "#2ec4b6")
+    ac = t.get("accent", "#3d7aed")
+    dark = "true" if _hex_lum(bg) < 0.5 else "false"
+    return (
+        _LOADER_TEMPLATE
+        .replace("__BG__", bg)
+        .replace("__BORDER__", border)
+        .replace("__QA__", qa)
+        .replace("__AC__", ac)
+        .replace("__DARK__", dark)
+    )
+
+
 def render():
-    st.title("🤖 QA 분석가")
+    st.html(_TITLE_HTML)
     st.caption(
         "규제·고시·뉴스 항목의 QA 영향도와 해야 할 일을 정리합니다. "
         "(분석·요약 전용 — 의사결정/거부권 없음)"
@@ -48,13 +150,18 @@ def render():
             try:
                 from utils.claude_client import call_claude
 
-                with st.spinner("QA 영향도 분석 중..."):
+                loader = st.empty()
+                with loader.container():
+                    components.html(_loader_html(), height=192)
+                try:
                     out = call_claude(
                         system=_load_prompt(),
                         messages=[{"role": "user", "content": text.strip()}],
                         max_tokens=900,
                         feature="qa_analyst",
                     )
+                finally:
+                    loader.empty()
                 # 분석 실행 행동 기록 (토큰은 call_claude 내부에서 별도 기록)
                 try:
                     from data_layer import usage as _usage
