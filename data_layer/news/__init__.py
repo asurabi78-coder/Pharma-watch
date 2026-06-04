@@ -1,9 +1,10 @@
 """뉴스룸 — Phase B.
 
-3개 사이트 동시 수집 + SQLite 영속.
+4개 사이트 동시 수집 + SQLite 영속.
 - 데일리팜 (HTML)
 - 약업신문 (HTML — 유통/산업 카테고리 별도)
 - 물류신문 (RSS — 3PL/콜드체인/SCM/물류센터)
+- 메디팜뉴스 (RSS — 정책/의료·병원/약사·약국/제약·바이오/라이프)
 """
 from __future__ import annotations
 
@@ -14,13 +15,15 @@ from data_layer.news.models import NewsItem
 from data_layer.news.connectors.dailypharm import fetch as fetch_dailypharm
 from data_layer.news.connectors.yakup import fetch as fetch_yakup
 from data_layer.news.connectors.klnews import fetch as fetch_klnews
+from data_layer.news.connectors.medipharm import fetch as fetch_medipharm
 from data_layer.news import repo
 
 
 SOURCES = [
-    {"key": "dailypharm", "label": "데일리팜", "fetch": fetch_dailypharm, "default_limit": 15},
-    {"key": "yakup",      "label": "약업신문", "fetch": fetch_yakup,      "default_limit": 15},
-    {"key": "klnews",     "label": "물류신문", "fetch": fetch_klnews,     "default_limit": 15},
+    {"key": "dailypharm", "label": "데일리팜",   "fetch": fetch_dailypharm, "default_limit": 15},
+    {"key": "yakup",      "label": "약업신문",   "fetch": fetch_yakup,      "default_limit": 15},
+    {"key": "klnews",     "label": "물류신문",   "fetch": fetch_klnews,     "default_limit": 15},
+    {"key": "medipharm",  "label": "메디팜뉴스", "fetch": fetch_medipharm,  "default_limit": 15},
 ]
 
 
@@ -66,6 +69,7 @@ __all__ = [
     "fetch_dailypharm",
     "fetch_yakup",
     "fetch_klnews",
+    "fetch_medipharm",
     "fetch_all",
     "fetch_and_save",
     "repo",

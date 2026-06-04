@@ -196,6 +196,14 @@ def render() -> None:
                 )
                 if cat != "전체":
                     items = [x for x in items if x.category == cat]
+            elif src["key"] == "medipharm":
+                cat = st.selectbox(
+                    "메디팜뉴스 카테고리 필터",
+                    options=["전체", "정책", "의료·병원", "약사·약국", "제약·바이오", "라이프"],
+                    key=f"newsroom_cat_{src['key']}",
+                )
+                if cat != "전체":
+                    items = [x for x in items if x.category == cat]
 
             st.caption(f"표시 {len(items)}건")
             if not items:
