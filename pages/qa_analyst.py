@@ -14,6 +14,7 @@ import streamlit.components.v1 as components
 import branding
 from data_layer import qa_history
 from ui import theme as _theme
+from ui.auth import current_user
 
 _PROMPT_PATH = Path(__file__).parent.parent / "prompts" / "regulatory_qa_analyst.md"
 
@@ -29,29 +30,25 @@ def _load_prompt() -> str:
         )
 
 
-# ── 제목 아이콘 (A · 뉴럴 코어) — 테마 색 자동 연동 ──────────────
-_TITLE_HTML = """
-<div style="display:flex;align-items:center;gap:13px;margin:0 0 2px;">
-  <svg width="44" height="44" viewBox="0 0 100 100" style="flex:0 0 auto;" aria-hidden="true">
-    <polygon points="50,8 86,29 86,71 50,92 14,71 14,29" fill="none"
-             stroke="var(--qa)" stroke-width="4" stroke-linejoin="round"/>
-    <g stroke="var(--qa)" stroke-width="2" opacity="0.45">
-      <line x1="50" y1="50" x2="50" y2="30"/><line x1="50" y1="50" x2="34" y2="44"/>
-      <line x1="50" y1="50" x2="66" y2="44"/><line x1="50" y1="50" x2="38" y2="66"/>
-      <line x1="50" y1="50" x2="62" y2="66"/><line x1="34" y1="44" x2="50" y2="30"/>
-      <line x1="66" y1="44" x2="50" y2="30"/>
-    </g>
-    <g fill="var(--accent)">
-      <circle cx="50" cy="30" r="3.6"/><circle cx="34" cy="44" r="3.6"/>
-      <circle cx="66" cy="44" r="3.6"/><circle cx="38" cy="66" r="3.6"/>
-      <circle cx="62" cy="66" r="3.6"/>
-    </g>
-    <circle cx="50" cy="50" r="6.5" fill="var(--bg-1)" stroke="var(--qa)" stroke-width="3"/>
-  </svg>
-  <span style="font-family:'DM Serif Display','Noto Serif KR',serif;font-size:2.3rem;
-               font-weight:400;color:var(--text);letter-spacing:-0.01em;line-height:1.1;">QA 분석가</span>
-</div>
-"""
+# ── 제목 아이콘 (A · 뉴럴 코어) — iframe 렌더(확실), 테마 색 주입 ──────────
+def _title_html() -> str:
+    t = _theme.get_active_tokens()
+    qa = t.get("qa", "#2ec4b6")
+    ac = t.get("accent", "#3d7aed")
+    bg = t.get("bg_1", "#10141f")
+    tx = t.get("text", "#f1f5fb")
+    return f"""<!doctype html><html><head><meta charset='utf-8'>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Noto+Serif+KR:wght@400&display=swap" rel="stylesheet">
+<style>html,body{{margin:0;background:transparent;overflow:hidden;}}</style></head>
+<body><div style="display:flex;align-items:center;gap:12px;">
+<svg width="46" height="46" viewBox="0 0 100 100" style="flex:0 0 auto;">
+<polygon points="50,8 86,29 86,71 50,92 14,71 14,29" fill="none" stroke="{qa}" stroke-width="4" stroke-linejoin="round"/>
+<g stroke="{qa}" stroke-width="2" opacity="0.45">
+<line x1="50" y1="50" x2="50" y2="30"/><line x1="50" y1="50" x2="34" y2="44"/><line x1="50" y1="50" x2="66" y2="44"/><line x1="50" y1="50" x2="38" y2="66"/><line x1="50" y1="50" x2="62" y2="66"/><line x1="34" y1="44" x2="50" y2="30"/><line x1="66" y1="44" x2="50" y2="30"/></g>
+<g fill="{ac}"><circle cx="50" cy="30" r="3.6"/><circle cx="34" cy="44" r="3.6"/><circle cx="66" cy="44" r="3.6"/><circle cx="38" cy="66" r="3.6"/><circle cx="62" cy="66" r="3.6"/></g>
+<circle cx="50" cy="50" r="6.5" fill="{bg}" stroke="{qa}" stroke-width="3"/></svg>
+<span style="font-family:'DM Serif Display','Noto Serif KR',serif;font-size:33px;color:{tx};letter-spacing:-0.01em;line-height:1;">QA 분석가</span>
+</div></body></html>"""
 
 
 def _hex_lum(h: str) -> float:
@@ -130,7 +127,15 @@ def _loader_html() -> str:
 
 
 def render():
-    st.html(_TITLE_HTML)
+    components.html(_title_html(), height=60)
+
+    # 계정이 바뀌면(다른 ID 로그인) 이전 화면 상태(질문/답변/입력)를 비운다.
+    _uid = current_user()
+    if st.session_state.get("qa_owner") != _uid:
+        for _k in ("qa_last_q", "qa_last_a", "qa_saved_notice", "qa_save_err", "qa_input"):
+            st.session_state.pop(_k, None)
+        st.session_state["qa_owner"] = _uid
+
     st.caption(
         "규제·고시·뉴스 항목의 QA 영향도와 해야 할 일을 정리합니다. "
         "(분석·요약 전용 — 의사결정/거부권 없음)"
@@ -173,7 +178,7 @@ def render():
                 st.session_state["qa_last_q"] = text.strip()
                 st.session_state["qa_last_a"] = out
                 try:
-                    qa_history.save(text.strip(), out)
+                    qa_history.save(text.strip(), out, user=_uid)
                     st.session_state["qa_saved_notice"] = True
                 except Exception as e:  # noqa: BLE001
                     st.session_state["qa_saved_notice"] = False
@@ -193,19 +198,19 @@ def render():
             st.warning(f"기록 저장 실패: {st.session_state.pop('qa_save_err')}")
         st.markdown(last_a)
 
-    # ── 저장된 분석 기록 (목록 + 삭제) ──
-    _render_history()
+    # ── 저장된 분석 기록 (목록 + 삭제) — 현재 계정 것만 ──
+    _render_history(_uid)
 
     st.markdown("---")
     st.caption("🔒 대화형 연속 질의 · SOP 자동비교 · CAPA 자동작성은 상위 플랜 기능입니다.")
     st.caption(branding.FOOTER_NOTE)
 
 
-def _render_history():
+def _render_history(user: str):
     st.markdown("---")
     try:
-        total = qa_history.count()
-        records = qa_history.list_records(limit=200) if total else []
+        total = qa_history.count(user=user)
+        records = qa_history.list_records(user=user, limit=200) if total else []
     except Exception as e:  # noqa: BLE001
         st.warning(f"기록을 불러오지 못했습니다: {type(e).__name__}: {e}")
         return
@@ -218,7 +223,7 @@ def _render_history():
             if st.session_state.get("qa_confirm_clear"):
                 if st.button("⚠️ 전체삭제 확정", type="primary",
                              use_container_width=True, key="qa_clear_yes"):
-                    qa_history.clear_all()
+                    qa_history.clear_all(user=user)
                     st.session_state.pop("qa_confirm_clear", None)
                     st.session_state.pop("qa_last_a", None)
                     st.session_state.pop("qa_last_q", None)
@@ -246,5 +251,5 @@ def _render_history():
             st.markdown("**분석 결과**")
             st.markdown(rec.answer)
             if st.button("🗑 이 기록 삭제", key=f"qa_del_{rec.id}"):
-                qa_history.delete(rec.id)
+                qa_history.delete(rec.id, user=user)
                 st.rerun()
