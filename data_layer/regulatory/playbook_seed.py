@@ -35,8 +35,8 @@ TEMP_EXCURSION = TopicPlaybook(
     ),
     overview=(
         "콜드체인은 의약품을 제조부터 환자 전달까지 규정 온도(2~8℃ 냉장, −20℃ 이하 냉동 등)로 "
-        "유지·운송하는 체계다. 「약사법」과 그 하위 「의약품 등의 안전 및 품질관리에 관한 규정」(KGSP)이 "
-        "보관·운송 품질의 법적 근거이며, 생물학적제제는 별도 관리 규칙이 추가 적용된다."
+        "유지·운송하는 체계다. 「약사법」과 그 시행규칙 별표6 「의약품 유통품질 관리기준」(KGSP)이 "
+        "보관·운송 품질의 법적 근거이며, 생물학적제제는 「생물학적 제제 등의 제조ㆍ판매관리 규칙」이 추가 적용된다."
     ),
     aliases=["온도이탈", "온도 일탈", "일탈", "excursion", "콜드체인", "보관 온도", "온도"],
     reg_refs=[
@@ -48,28 +48,28 @@ TEMP_EXCURSION = TopicPlaybook(
             provenance=Provenance.AUTO,
         ),
         RegRef(
-            title="의약품 등의 안전 및 품질관리에 관한 규정 — 보관 관리",
+            title="의약품 유통품질 관리기준(KGSP) — 보관 관리",
             tier=SourceTier.LAW,
-            article="제○조(보관 관리)",
-            url=_LAW + "의약품 등의 안전 및 품질관리에 관한 규정",
+            article="약사법 시행규칙 별표6 (제62조제7호 관련)",
+            url=_LAW + "의약품 유통품질 관리기준",
             effective_date="2024-01-01",
             law_entry_id="kgsp_storage",
             provenance=Provenance.AUTO,
         ),
         RegRef(
-            title="의약품 안전운송 관리 기준 (식약처 고시)",
-            tier=SourceTier.NOTICE,
-            article="식약처 고시 제2024-○호",
-            url=_ADM + "의약품 안전운송 관리 기준",
-            effective_date="2024-06-01",
+            title="생물학적 제제 등 보관 및 수송 관리 가이드라인",
+            tier=SourceTier.GUIDE,
+            article="식약처 민원인 안내서 · 2023-12-28 개정",
+            url=_LAW + "생물학적 제제 등의 제조ㆍ판매관리 규칙",
+            effective_date="2023-12-28",
             law_entry_id="mfds_transport",
             provenance=Provenance.AUTO,
         ),
         RegRef(
-            title="WHO GDP — 콜드체인 가이드",
+            title="WHO TRS 961 Annex 9 — 온도민감 의약품 보관·수송 가이드",
             tier=SourceTier.GUIDE,
-            article="GDP §5 (Cold Chain)",
-            url="https://www.who.int/publications/i/item/WHO-TRS-961",
+            article="WHO TRS 961, Annex 9 (2011)",
+            url="https://www.who.int/publications/m/item/trs961-annex9",
             effective_date="2020-03-15",
             law_entry_id="gdp_cold_chain",
             key_points=[
@@ -83,10 +83,10 @@ TEMP_EXCURSION = TopicPlaybook(
     ],
     reference_links=[
         ReferenceLink(
-            title="WHO TRS — Good Distribution Practices for pharmaceutical products",
-            url="https://www.who.int/publications/i/item/WHO-TRS-961",
+            title="WHO TRS 961 Annex 9 — 온도민감 의약품 보관·수송 모델 가이드",
+            url="https://www.who.int/publications/m/item/trs961-annex9",
             source="WHO",
-            note="콜드체인 보관·운송·검증의 국제 기준 원문(PDF).",
+            note="콜드체인 보관·운송·검증의 국제 기준 원문.",
         ),
         ReferenceLink(
             title="식약처 의약품 우수유통관리기준(KGSP) 안내서",
@@ -177,10 +177,10 @@ RELEASE_CERT = TopicPlaybook(
     web_query="의약품 출하증명서",
     reg_refs=[
         RegRef(
-            title="의약품 출하 — 출하증명서 발행",
+            title="의약품 출하 — 출하증명서 발행 (KGSP)",
             tier=SourceTier.LAW,
-            article="제○조(출하 관리)",
-            url=_LAW + "의약품 출하증명",
+            article="약사법 시행규칙 별표6 (의약품 유통품질 관리기준)",
+            url=_LAW + "의약품 유통품질 관리기준",
             effective_date="2024-01-01",
             law_entry_id="kgsp_release",
             provenance=Provenance.AUTO,
@@ -236,10 +236,10 @@ VACCINE_BRC = TopicPlaybook(
             provenance=Provenance.AUTO,
         ),
         RegRef(
-            title="의약품 등의 안전 및 품질관리에 관한 규정 — 보관 관리",
+            title="의약품 유통품질 관리기준(KGSP) — 보관 관리",
             tier=SourceTier.LAW,
-            article="제○조(보관 관리)",
-            url=_LAW + "의약품 등의 안전 및 품질관리에 관한 규정",
+            article="약사법 시행규칙 별표6 (제62조제7호 관련)",
+            url=_LAW + "의약품 유통품질 관리기준",
             effective_date="2024-01-01",
             law_entry_id="kgsp_storage",
             provenance=Provenance.AUTO,

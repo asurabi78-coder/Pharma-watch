@@ -10,9 +10,9 @@ from data_layer.regulatory.models import LawEntry
 SEED_ENTRIES = [
     LawEntry(
         id="kgsp_storage",
-        title="의약품 등의 안전 및 품질관리에 관한 규정 — 보관 관리",
+        title="의약품 유통품질 관리기준(KGSP) — 보관 관리",
         grade=SourceTier.LAW,
-        article="제○조 보관 관리",
+        article="약사법 시행규칙 별표6 (제62조제7호 관련)",
         effective_date="2024-01-01",
         source="law.go.kr / MFDS",
         content=(
@@ -29,9 +29,9 @@ SEED_ENTRIES = [
     ),
     LawEntry(
         id="kgsp_release",
-        title="의약품 출하 — 출하증명서 발행",
+        title="의약품 출하 — 출하증명서 발행 (KGSP)",
         grade=SourceTier.LAW,
-        article="제○조 출하 관리",
+        article="약사법 시행규칙 별표6 (의약품 유통품질 관리기준)",
         effective_date="2024-01-01",
         source="law.go.kr / MFDS",
         content=(
@@ -49,30 +49,32 @@ SEED_ENTRIES = [
     ),
     LawEntry(
         id="mfds_transport",
-        title="의약품 안전운송 관리 기준",
-        grade=SourceTier.NOTICE,
-        article="식약처 고시 제2024-○호",
-        effective_date="2024-06-01",
-        source="MFDS 법령정보",
+        title="생물학적 제제 등 보관 및 수송 관리 가이드라인",
+        grade=SourceTier.GUIDE,
+        article="식약처 민원인 안내서 · 2023-12-28 개정 (법적 근거: 생물학적 제제 등의 제조ㆍ판매관리 규칙)",
+        effective_date="2023-12-28",
+        source="MFDS 민원인 안내서",
         content=(
-            "의약품 운송업자는 다음을 갖추어야 한다.\n"
-            "1. 운송 중 온도 기록 장치(데이터 로거)\n"
-            "2. 일탈 발생 시 알림 시스템\n"
-            "3. 운송 SOP 및 운전자 교육 기록"
+            "생물학적 제제 등의 보관·수송 시 다음을 갖추어야 한다.\n"
+            "1. 보관시설·수송차량·수송용기 내부에 자동온도기록장치 설치\n"
+            "2. 수송용기 외부 온도계 부착, 적정 온도 유지 구조·장치 사전 검증\n"
+            "3. 자동온도기록장치 검정·교정 후 기록 2년 보관\n"
+            "4. 제품을 바닥에 직접 닿지 않게 보관"
         ),
         practical_interpretation=(
-            "냉장·냉동 운송 차량은 데이터 로거 의무 부착. "
-            "로거 단가·유심비·검교정비 등 운송 비용 항목을 사전에 확인할 것."
+            "냉장·냉동 수송 차량·용기는 자동온도기록장치 의무. "
+            "로거 단가·유심비·검교정비 등 수송 비용 항목을 사전 확인. "
+            "일시적 온도 일탈 시 과학적 입증(안정성 데이터) 자료를 함께 보관."
         ),
-        tags=["운송", "콜드체인", "로거", "고시", "MFDS"],
+        tags=["수송", "콜드체인", "로거", "생물학적제제", "MFDS", "가이드라인"],
     ),
     LawEntry(
         id="gdp_cold_chain",
-        title="WHO Good Distribution Practices — 콜드체인 가이드",
+        title="WHO TRS 961 Annex 9 — 온도민감 의약품 보관·수송 가이드",
         grade=SourceTier.GUIDE,
-        article="GDP §5 (Cold Chain)",
-        effective_date="2020-03-15",
-        source="MFDS 안내서 / WHO TRS",
+        article="WHO TRS 961, Annex 9 (2011)",
+        effective_date="2011-01-01",
+        source="WHO TRS 961, Annex 9",
         content=(
             "콜드체인 의약품 유통자는:\n"
             "1. 검증된 보관·운송 조건 유지\n"
