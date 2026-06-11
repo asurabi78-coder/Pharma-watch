@@ -14,6 +14,7 @@ venv/
 # Databases / generated data
 *.db
 db/ui_theme.txt
+data_layer/rag/index/
 
 # Misc
 _bashtest.txt

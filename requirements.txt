@@ -4,3 +4,4 @@ python-dotenv>=1.0
 requests>=2.31
 beautifulsoup4>=4.12
 lxml>=5.0
+pypdf>=4.0          # 법령 어시스턴트(RAG): PDF 코퍼스 인제스트용 (선택; md/txt만 쓰면 불필요)
