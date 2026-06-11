@@ -16,6 +16,7 @@ import requests
 from bs4 import BeautifulSoup
 
 from data_layer.news.models import NewsItem
+from data_layer.news.dateparse import anchor_date
 
 
 _BASE_URL = "https://www.yakup.com"
@@ -104,6 +105,7 @@ def _extract_items(html: str) -> List[NewsItem]:
 
         url_full = urljoin(_BASE_URL, href)
         item_id = f"yakup:{article_id}"
+        published = anchor_date(a)
 
         items.append(NewsItem(
             id=item_id,
@@ -112,6 +114,7 @@ def _extract_items(html: str) -> List[NewsItem]:
             source="yakup",
             source_label="약업신문",
             category=category,
+            published_at=published,
             fetched_at=now,
         ))
     return items

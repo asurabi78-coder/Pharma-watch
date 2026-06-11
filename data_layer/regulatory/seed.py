@@ -146,4 +146,145 @@ SEED_ENTRIES = [
         ),
         tags=["AI", "추정", "확인필요"],
     ),
+    # ── 확장 시드 (2026-06): 검색 0건 키워드 보강 ──────────────────────────
+    LawEntry(
+        id="narcotics_storage",
+        title="마약류 보관·관리 기준 (마약류관리법)",
+        grade=SourceTier.LAW,
+        article="마약류 관리에 관한 법률 제15조·시행규칙 제26조",
+        effective_date="2024-06-01",
+        source="law.go.kr / 식약처",
+        content=(
+            "마약류취급자는 다음을 준수하여야 한다.\n"
+            "1. 마약·향정신성의약품은 이중 잠금장치가 있는 견고한 장소(철제금고 등)에 저장\n"
+            "2. 저장시설은 일반 의약품과 구분, 출입 통제 및 CCTV 권장\n"
+            "3. 입·출고 및 재고를 마약류통합관리시스템(NIMS)에 보고\n"
+            "4. 사고(분실·도난·변질) 발생 시 즉시 관할 기관 보고"
+        ),
+        practical_interpretation=(
+            "3PL 창고에서 마약류 취급 시 별도 이중잠금 보관소 + NIMS 보고 체계 필수. "
+            "재고 실사 불일치는 사고마약류로 간주될 수 있어 일·월 단위 재고대사 SOP 필요."
+        ),
+        tags=["마약류", "NIMS", "보관", "재고", "보안", "법령"],
+    ),
+    LawEntry(
+        id="inventory_expiry",
+        title="재고·유효기간 관리 (선입선출/사용기한)",
+        grade=SourceTier.GUIDE,
+        article="KGSP 별표6 · GDP 재고관리 원칙",
+        effective_date="2024-01-01",
+        source="MFDS / WHO GDP",
+        content=(
+            "의약품 재고 관리 시:\n"
+            "1. 선입선출(FEFO, 유효기간 우선) 원칙 적용\n"
+            "2. 유효기간 임박품(통상 잔여 6개월 이내) 별도 식별·관리\n"
+            "3. 사용기한 경과품은 즉시 격리 후 판매 가능 재고와 분리\n"
+            "4. 정기 재고실사 및 전산-실물 일치 관리"
+        ),
+        practical_interpretation=(
+            "WMS 에 유효기간(로트) 단위 관리 + FEFO 피킹 로직 필수. "
+            "유효기간 임박 알림 자동화로 반품·폐기 손실 최소화. 실사 불일치 원인분석 기록 보관."
+        ),
+        tags=["재고", "유효기간", "FEFO", "선입선출", "실사", "WMS"],
+    ),
+    LawEntry(
+        id="returns_management",
+        title="반품 의약품 처리 기준",
+        grade=SourceTier.GUIDE,
+        article="KGSP 유통품질 관리기준 — 반품",
+        effective_date="2024-01-01",
+        source="law.go.kr / MFDS",
+        content=(
+            "반품된 의약품은 다음에 따라 처리한다.\n"
+            "1. 반품품은 즉시 별도 구역에 격리(판매 가능 재고와 물리적 분리)\n"
+            "2. 보관조건 이탈 여부·포장 상태·유효기간을 품질책임자가 평가\n"
+            "3. 재판매(재입고) 가능 여부는 품질책임자 판정 후에만 결정\n"
+            "4. 부적합 반품품은 폐기 절차에 따라 처리·기록"
+        ),
+        practical_interpretation=(
+            "콜드체인 제품 반품은 온도이력 입증이 안 되면 원칙적으로 재판매 불가. "
+            "반품 격리구역과 재판매 판정 SOP, 폐기 증빙(폐기물 처리 위탁계약) 구비 필요."
+        ),
+        tags=["반품", "재판매", "격리", "폐기", "품질책임자"],
+    ),
+    LawEntry(
+        id="recall_procedure",
+        title="의약품 회수·폐기 절차 (위해성 등급 회수)",
+        grade=SourceTier.LAW,
+        article="약사법 제39조 · 의약품 회수·폐기 등에 관한 규정",
+        effective_date="2024-03-01",
+        source="law.go.kr / 식약처 고시",
+        content=(
+            "회수 대상 의약품 발생 시:\n"
+            "1. 위해성 등급(1~3등급)에 따라 회수계획서 보고\n"
+            "2. 1등급은 24시간 내, 2등급 48시간, 3등급 72시간 내 회수 착수\n"
+            "3. 유통·판매처에 회수 사실 통보 및 반송 회수\n"
+            "4. 회수 종료 후 결과보고서 제출, 회수품 폐기 기록 보관"
+        ),
+        practical_interpretation=(
+            "3PL 은 위탁자 회수 발생 시 즉시 출고 중지 + 해당 로트 재고 동결 + 추적(traceability) 자료 제공. "
+            "로트별 입출고 이력 추적이 안 되면 회수 대응이 지연되므로 로트 추적 체계 필수."
+        ),
+        tags=["회수", "리콜", "폐기", "위해성등급", "추적", "법령"],
+    ),
+    LawEntry(
+        id="change_control",
+        title="변경관리 (Change Control)",
+        grade=SourceTier.GUIDE,
+        article="GMP/GDP 품질시스템 — 변경관리",
+        effective_date="2023-01-01",
+        source="MFDS 안내서",
+        content=(
+            "보관·운송·설비·공급망 등 변경 시:\n"
+            "1. 변경 요청서 작성 및 영향평가\n"
+            "2. 품질에 미치는 영향 검토 후 승인\n"
+            "3. 필요 시 재검증(re-validation) 수행\n"
+            "4. 변경 이력 문서화 및 관련자 교육"
+        ),
+        practical_interpretation=(
+            "창고 이전·운송사 변경·온도설비 교체는 변경관리 대상. "
+            "위탁자 사전 승인 없이 변경 시 SLA 위반·인증 리스크. 변경 전 영향평가서 위탁자 공유 권장."
+        ),
+        tags=["변경관리", "change control", "재검증", "위탁", "품질시스템"],
+    ),
+    LawEntry(
+        id="contract_outsourcing",
+        title="위·수탁 관리 기준 (품질 위·수탁)",
+        grade=SourceTier.LAW,
+        article="약사법 시행규칙 · 의약품 제조·품질관리 위수탁 기준",
+        effective_date="2024-01-01",
+        source="law.go.kr / MFDS",
+        content=(
+            "품질 업무를 위·수탁하는 경우:\n"
+            "1. 위·수탁 범위·책임을 명시한 품질계약서(Quality Agreement) 체결\n"
+            "2. 수탁자의 적격성 평가(실사 등) 및 주기적 점검\n"
+            "3. 위탁자는 수탁자 업무에 대한 최종 품질책임 보유\n"
+            "4. 변경·일탈 발생 시 상호 통보 절차 명문화"
+        ),
+        practical_interpretation=(
+            "3PL 보관·운송 수탁 시 Quality Agreement + SLA 동시 관리. "
+            "위탁자 정기 실사(audit) 대응 체크리스트, 일탈 통보 SLA(예: 24시간) 사전 합의 필요."
+        ),
+        tags=["위탁", "수탁", "품질계약", "Quality Agreement", "실사", "SLA"],
+    ),
+    LawEntry(
+        id="self_inspection",
+        title="자체점검·실태조사 대응 (Self-inspection/Audit)",
+        grade=SourceTier.GUIDE,
+        article="KGSP/GDP — 자체점검",
+        effective_date="2024-01-01",
+        source="MFDS 안내서 / WHO GDP",
+        content=(
+            "유통품질 시스템 유지를 위해:\n"
+            "1. 연 1회 이상 자체점검(self-inspection) 실시\n"
+            "2. 점검 결과 부적합 사항에 대한 CAPA 수립·이행\n"
+            "3. 식약처 실태조사(정기/수시) 대비 문서·기록 상시 구비\n"
+            "4. 점검·시정 이력 문서 보관"
+        ),
+        practical_interpretation=(
+            "실태조사 단골 지적: 온도기록 누락, 교육이수 미비, SOP 최신화 미흡, 일탈 종결 지연. "
+            "연 1회 자체점검 체크리스트 + CAPA 추적표로 상시 대비. 제출자료 마감 관리 필요."
+        ),
+        tags=["실태조사", "자체점검", "audit", "CAPA", "자료제출", "점검"],
+    ),
 ]

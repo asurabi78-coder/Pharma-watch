@@ -52,8 +52,14 @@ def fetch_all(*, per_source_limit: Optional[int] = None) -> tuple:
 
 
 def fetch_and_save(*, per_source_limit: Optional[int] = None) -> dict:
-    """fetch_all + SQLite 저장."""
+    """fetch_all + 중요도 태깅 + SQLite 저장."""
     items, stats = fetch_all(per_source_limit=per_source_limit)
+    # 결정론적 중요도 부여 (LLM 비용 0)
+    try:
+        from data_layer.news import tagging
+        tagging.apply(items)
+    except Exception:
+        pass
     new_n, upd_n = repo.upsert(items) if items else (0, 0)
     return {
         "stats": stats,

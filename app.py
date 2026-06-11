@@ -53,6 +53,7 @@ PAGES = {
     "newsroom":   ["뉴스 모니터링", "pages.newsroom"],
     "regulatory": ["규제 검색",     "pages.regulatory"],
     "qa_analyst": ["QA 분석가",     "pages.qa_analyst"],
+    "sop_compare": ["SOP 자동비교",  "pages.sop_compare"],
     "rag_assistant": ["법령 어시스턴트", "pages.rag_assistant"],
     "usage":      ["사용량",        "pages.usage"],  # 관리자 전용 — 메뉴는 아래에서 별도 노출
 }
@@ -61,7 +62,7 @@ PAGES = {
 _HIDDEN_FROM_MENU = {"usage"}
 
 # 상위(유료) 기능 — 화면엔 보이되 잠금. (원칙 5·6)
-LOCKED = ["SOP 자동비교", "CAPA 자동작성", "대화형 QA 질의"]
+LOCKED = ["CAPA 자동작성", "대화형 QA 질의"]
 
 
 if "page" not in st.session_state:

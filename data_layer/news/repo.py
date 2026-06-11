@@ -35,7 +35,8 @@ CREATE TABLE IF NOT EXISTS news_items (
     tags TEXT DEFAULT '[]',
     thumbnail TEXT DEFAULT '',
     is_starred INTEGER DEFAULT 0,
-    is_hidden INTEGER DEFAULT 0
+    is_hidden INTEGER DEFAULT 0,
+    importance TEXT DEFAULT ''
 );
 
 CREATE INDEX IF NOT EXISTS idx_news_source_ts
@@ -60,6 +61,10 @@ def _connect(db_path: Optional[Path] = None) -> sqlite3.Connection:
 def init_db(db_path: Optional[Path] = None) -> None:
     with _connect(db_path) as conn:
         conn.executescript(_SCHEMA)
+        # 기존 DB 호환 — importance 컬럼이 없으면 추가
+        cols = {r[1] for r in conn.execute("PRAGMA table_info(news_items)")}
+        if "importance" not in cols:
+            conn.execute("ALTER TABLE news_items ADD COLUMN importance TEXT DEFAULT ''")
 
 
 def upsert(items: Iterable[NewsItem], *, db_path: Optional[Path] = None):
@@ -76,13 +81,14 @@ def upsert(items: Iterable[NewsItem], *, db_path: Optional[Path] = None):
                     """
                     INSERT INTO news_items (
                         id, title, url, source, source_label, category,
-                        summary, published_at, fetched_at, tags, thumbnail
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        summary, published_at, fetched_at, tags, thumbnail, importance
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                     (
                         it.id, it.title, it.url, it.source, it.source_label,
                         it.category, it.summary, it.published_at, it.fetched_at,
                         json.dumps(it.tags, ensure_ascii=False), it.thumbnail or "",
+                        getattr(it, "importance", "") or "",
                     ),
                 )
                 new_n += 1
@@ -93,13 +99,14 @@ def upsert(items: Iterable[NewsItem], *, db_path: Optional[Path] = None):
                        SET title = ?, summary = ?,
                            published_at = COALESCE(NULLIF(?, ''), published_at),
                            fetched_at = ?, tags = ?, thumbnail = ?,
-                           category = COALESCE(NULLIF(?, ''), category)
+                           category = COALESCE(NULLIF(?, ''), category),
+                           importance = COALESCE(NULLIF(?, ''), importance)
                      WHERE id = ?
                     """,
                     (
                         it.title, it.summary, it.published_at, it.fetched_at,
                         json.dumps(it.tags, ensure_ascii=False), it.thumbnail or "",
-                        it.category, it.id,
+                        it.category, getattr(it, "importance", "") or "", it.id,
                     ),
                 )
                 upd_n += 1
@@ -123,6 +130,7 @@ def _row_to_item(row: sqlite3.Row) -> NewsItem:
         fetched_at=row["fetched_at"] or "",
         tags=tags,
         thumbnail=row["thumbnail"] or None,
+        importance=(row["importance"] if "importance" in row.keys() else "") or "",
     )
 
 
@@ -133,6 +141,7 @@ def list_items(
     text_search: Optional[str] = None,
     days: Optional[int] = None,
     include_hidden: bool = False,
+    importance_in: Optional[List[str]] = None,
     limit: int = 100,
     db_path: Optional[Path] = None,
 ) -> List[NewsItem]:
@@ -161,6 +170,11 @@ def list_items(
             "substr(COALESCE(NULLIF(published_at, ''), fetched_at), 1, 19) >= ?"
         )
         params.append(threshold)
+
+    if importance_in:
+        ph = ",".join(["?"] * len(importance_in))
+        where.append(f"importance IN ({ph})")
+        params.extend(importance_in)
 
     if not include_hidden:
         where.append("is_hidden = 0")

@@ -19,6 +19,7 @@ import requests
 from bs4 import BeautifulSoup
 
 from data_layer.news.models import NewsItem
+from data_layer.news.dateparse import anchor_date
 
 
 _BASE_URL = "https://www.dailypharm.com"
@@ -88,6 +89,7 @@ def _extract_items(html: str) -> List[NewsItem]:
 
         url_full = urljoin(_BASE_URL, path)
         item_id = f"dailypharm:{article_id}"
+        published = anchor_date(a)
 
         items.append(NewsItem(
             id=item_id,
@@ -95,6 +97,7 @@ def _extract_items(html: str) -> List[NewsItem]:
             url=url_full,
             source="dailypharm",
             source_label="데일리팜",
+            published_at=published,
             fetched_at=now,
         ))
 

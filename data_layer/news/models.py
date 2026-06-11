@@ -19,3 +19,4 @@ class NewsItem:
     fetched_at: str = ""             # 수집 시점
     tags: List[str] = field(default_factory=list)
     thumbnail: Optional[str] = None  # 썸네일 URL (있으면)
+    importance: str = ""             # 결정론적 중요도: high / mid / low (빈값=미평가)

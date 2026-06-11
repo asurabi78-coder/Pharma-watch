@@ -41,8 +41,17 @@ def _render_item_card(
         with head[0]:
             cat_text = f" · {it.category}" if it.category else ""
             published = it.published_at[:16].replace("T", " ") if it.published_at else "—"
+            try:
+                from data_layer.news.tagging import label as _imp_label
+                _imp_txt, _ = _imp_label(getattr(it, "importance", ""))
+            except Exception:
+                _imp_txt = ""
+            badge = (
+                f"<span style='font-size:11px;font-weight:600;margin-right:6px;'>{_imp_txt}</span>"
+                if _imp_txt else ""
+            )
             st.markdown(
-                f"**[{it.title}]({it.url})**  \n"
+                f"{badge}**[{it.title}]({it.url})**  \n"
                 f"<span style='color:#8794ad;font-size:12px'>"
                 f"[{source_label_override or it.source_label}]"
                 f"{cat_text} · 🕒 {published}"
@@ -75,7 +84,7 @@ def render() -> None:
     st.caption("의약품·물류 도메인 뉴스 — 데일리팜 · 약업신문 · 물류신문")
 
     # ── 상단 컨트롤 ────────────────────────────
-    ctrl = st.columns([2, 2, 2, 4])
+    ctrl = st.columns([2, 2, 2, 2, 3])
     with ctrl[0]:
         per_src = st.number_input(
             "소스당 최대",
@@ -91,12 +100,24 @@ def render() -> None:
         )
         days = _RANGE_OPTIONS[range_label]
     with ctrl[2]:
+        imp_label = st.selectbox(
+            "중요도",
+            options=["전체", "🔴 높음만", "🔴+🟠 보통이상"],
+            index=0,
+            key="newsroom_importance",
+        )
+        importance_in = {
+            "전체": None,
+            "🔴 높음만": ["high"],
+            "🔴+🟠 보통이상": ["high", "mid"],
+        }[imp_label]
+    with ctrl[3]:
         text_search = st.text_input(
             "🔍 검색", value="",
-            placeholder="키워드 (제목·요약)",
+            placeholder="키워드",
             key="newsroom_search",
         )
-    with ctrl[3]:
+    with ctrl[4]:
         bcols = st.columns([1, 1])
         with bcols[0]:
             if st.button("🔄 새로고침 (재수집)", use_container_width=True, key="newsroom_fetch"):
@@ -163,6 +184,7 @@ def render() -> None:
         items = repo.list_items(
             text_search=text_search.strip() or None,
             days=days,
+            importance_in=importance_in,
             limit=200,
         )
         st.caption(f"표시 {len(items)}건 · 보관 총 {total}건")
@@ -177,6 +199,7 @@ def render() -> None:
                 sources=[src["key"]],
                 text_search=text_search.strip() or None,
                 days=days,
+                importance_in=importance_in,
                 limit=100,
             )
 

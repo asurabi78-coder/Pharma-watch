@@ -9,6 +9,7 @@ _CARDS = [
     ("📰 뉴스 모니터링", "데일리팜·약업신문·물류신문 자동 수집", "newsroom"),
     ("🔍 규제 검색", "KGSP·GDP·GMP 원문 검색", "regulatory"),
     ("🤖 QA 분석가", "규제·뉴스의 QA 영향도 + Action Item 추천", "qa_analyst"),
+    ("📑 SOP 자동비교", "내부 SOP의 규제 충족도를 절 단위로 점검", "sop_compare"),
 ]
 
 
@@ -30,6 +31,18 @@ def render():
                     st.session_state.setdefault("nav_history", []).append("home")
                     st.session_state.page = key
                     st.rerun()
+
+    st.markdown("---")
+    with st.expander("📋 오늘의 브리핑 (자동 생성)", expanded=True):
+        try:
+            from data_layer import digest as _digest
+            st.markdown(_digest.build_digest())
+        except Exception as e:  # noqa: BLE001
+            st.caption(f"브리핑 생성 실패: {type(e).__name__}: {e}")
+        st.caption(
+            "💡 매일 아침 자동 수집·발송을 원하면 스케줄러에 "
+            "`python -m scripts.daily_digest --email` 을 등록하세요."
+        )
 
     st.markdown("---")
     st.caption(
