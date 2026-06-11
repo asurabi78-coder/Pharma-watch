@@ -3,6 +3,7 @@
 구성:
   (1) 최근 N일 중요(high/mid) 뉴스
   (2) 향후 N일 내 규제 시행/마감 일정 (시드 시행일 + 플레이북 변경)
+  (3) 개정 영향 알림 (미확인 SOP 영향 리포트가 있을 때만)
 
 LLM 없이 동작(결정론적). 결과는 마크다운 문자열.
 선택적으로 SMTP 로 이메일 발송(.env: PW_SMTP_HOST/PORT/USER/PASS/FROM/TO).
@@ -99,6 +100,17 @@ def build_digest(*, news_days: int = 1, reg_window: int = 30,
                 dtxt = ""
             lines.append(f"- **{d}** ({dtxt}) · {kind} — {title}")
     lines.append("")
+
+    # (3) 개정 영향 알림 — 미확인 리포트가 있을 때만 섹션 추가
+    try:
+        from engines.impact_engine import digest_lines
+        impact = digest_lines(limit=5)
+        if impact:
+            lines.extend(impact)
+            lines.append("")
+    except Exception:
+        pass
+
     lines.append("---")
     lines.append("_결정론적 자동 생성 — Pharma Watch. 상세는 앱에서 확인하세요._")
     return "\n".join(lines)

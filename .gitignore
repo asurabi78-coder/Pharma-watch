@@ -13,7 +13,8 @@ venv/
 
 # Databases / generated data
 *.db
-db/ui_theme.txt
+*.db-journal
+db/
 data_layer/rag/index/
 
 # Misc

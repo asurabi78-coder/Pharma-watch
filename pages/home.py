@@ -10,6 +10,7 @@ _CARDS = [
     ("🔍 규제 검색", "KGSP·GDP·GMP 원문 검색", "regulatory"),
     ("🤖 QA 분석가", "규제·뉴스의 QA 영향도 + Action Item 추천", "qa_analyst"),
     ("📑 SOP 자동비교", "내부 SOP의 규제 충족도를 절 단위로 점검", "sop_compare"),
+    ("⚠️ 개정 영향분석", "규제가 바뀌면 등록된 SOP 전체를 자동 재점검", "impact"),
 ]
 
 

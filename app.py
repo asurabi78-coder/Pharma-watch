@@ -54,6 +54,7 @@ PAGES = {
     "regulatory": ["규제 검색",     "pages.regulatory"],
     "qa_analyst": ["QA 분석가",     "pages.qa_analyst"],
     "sop_compare": ["SOP 자동비교",  "pages.sop_compare"],
+    "impact":     ["개정 영향분석", "pages.impact"],
     "rag_assistant": ["법령 어시스턴트", "pages.rag_assistant"],
     "usage":      ["사용량",        "pages.usage"],  # 관리자 전용 — 메뉴는 아래에서 별도 노출
 }
