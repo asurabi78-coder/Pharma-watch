@@ -53,6 +53,16 @@ def _upcoming_regulatory(window_days: int = 30, today: Optional[datetime] = None
     except Exception:
         pass
 
+    # 캘린더의 사내 일정·KGSP 의무 (미완료만)
+    try:
+        from data_layer import calendar_repo as _cal
+        kind_label = {"duty": "KGSP 의무", "internal": "사내 일정"}
+        for ev in _cal.upcoming(window_days, today=today.date()):
+            if ev.track in ("duty", "internal") and ev.status != "done":
+                out.append((ev.date, kind_label.get(ev.track, "일정"), ev.title))
+    except Exception:
+        pass
+
     return sorted(out, key=lambda t: t[0])
 
 
