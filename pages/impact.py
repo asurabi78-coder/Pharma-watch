@@ -62,10 +62,28 @@ def _render_vault(user: str):
     st.markdown("#### SOP 등록")
     st.caption("여기에 등록된 SOP 만 자동 영향분석 대상이 됩니다.")
 
+    up = st.file_uploader(
+        "파일 업로드 (docx · pdf · txt) — 올리면 아래 양식에 자동으로 채워집니다",
+        type=["docx", "pdf", "txt", "md"],
+        key="impact_upload",
+    )
+    if up is not None and st.session_state.get("impact_upload_name") != up.name:
+        from utils.doc_extract import extract_text
+        text, err = extract_text(up.name, up.getvalue())
+        if err:
+            st.error(err)
+        else:
+            st.session_state["impact_sop_title"] = up.name.rsplit(".", 1)[0]
+            st.session_state["impact_sop_body"] = text
+            st.session_state["impact_upload_name"] = up.name
+            st.success(f"📄 {up.name} 에서 {len(text):,}자 추출 — 아래 양식 확인 후 등록하세요.")
+
     with st.form("impact_add_sop", clear_on_submit=True):
-        title = st.text_input("SOP 제목", placeholder="예: 보관관리 SOP v1.2")
+        title = st.text_input("SOP 제목", placeholder="예: 보관관리 SOP v1.2",
+                              key="impact_sop_title")
         body = st.text_area("SOP 본문", height=220,
-                            placeholder="내부 SOP 본문을 붙여넣으세요.")
+                            placeholder="내부 SOP 본문을 붙여넣거나, 위에 파일을 올리세요.",
+                            key="impact_sop_body")
         if st.form_submit_button("등록", type="primary"):
             if not title.strip() or not body.strip():
                 st.warning("제목과 본문을 모두 입력하세요.")

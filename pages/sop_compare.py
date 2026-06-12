@@ -76,10 +76,24 @@ def render():
 
     with col_r:
         st.markdown("#### ② 우리 SOP")
+        up = st.file_uploader(
+            "파일 업로드 (docx · pdf · txt) — 드래그&드롭 가능",
+            type=["docx", "pdf", "txt", "md"],
+            key="sopc_upload",
+        )
+        if up is not None and st.session_state.get("sopc_upload_name") != up.name:
+            from utils.doc_extract import extract_text
+            text, err = extract_text(up.name, up.getvalue())
+            if err:
+                st.error(err)
+            else:
+                st.session_state["sopc_sop_text"] = text
+                st.session_state["sopc_upload_name"] = up.name
+                st.success(f"📄 {up.name} 에서 {len(text):,}자 추출 — 아래에 채워졌습니다.")
         sop_text = st.text_area(
             "내부 SOP 텍스트",
             height=260,
-            placeholder="점검할 내부 SOP 본문을 붙여넣으세요.",
+            placeholder="점검할 내부 SOP 본문을 붙여넣거나, 위에 파일을 올리세요.",
             key="sopc_sop_text",
         )
 

@@ -55,6 +55,8 @@ PAGES = {
     "qa_analyst": ["QA 분석가",     "pages.qa_analyst"],
     "sop_compare": ["SOP 자동비교",  "pages.sop_compare"],
     "impact":     ["개정 영향분석", "pages.impact"],
+    "sop_generator": ["SOP 생성기",   "pages.sop_generator"],
+    "training":   ["교육·평가",      "pages.training"],
     "rag_assistant": ["법령 어시스턴트", "pages.rag_assistant"],
     "usage":      ["사용량",        "pages.usage"],  # 관리자 전용 — 메뉴는 아래에서 별도 노출
 }
