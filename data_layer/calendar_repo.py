@@ -1,7 +1,7 @@
 """규제 캘린더 이벤트 저장소 — SQLite (db/calendar.db).
 
 세 트랙의 일정을 한 테이블에 보관:
-  - external : 외부 규제 (시드 시행일·플레이북 변경 — sync_external 로 자동 유입)
+  - external : 외부 규제 (시드 시행일·플레이북 변경·규제 레이더 자동 유입)
   - duty     : KGSP 의무 주기 (회사 프로필 기반 자동 생성 — ensure_duties)
   - internal : 사내 일정 (감사·실태조사·교육 등 — 사용자가 직접 등록)
 
@@ -35,6 +35,7 @@ CREATE TABLE IF NOT EXISTS cal_events (
     ext_key TEXT DEFAULT '',
     ref_id TEXT DEFAULT '',
     tags TEXT DEFAULT '[]',
+    url TEXT DEFAULT '',
     created_at TEXT,
     updated_at TEXT,
     UNIQUE(source, ext_key, date)
@@ -60,6 +61,7 @@ class CalEvent:
     ext_key: str = ""
     ref_id: str = ""
     tags: List[str] = field(default_factory=list)
+    url: str = ""
 
 
 def _connect(db_path: Optional[Path] = None) -> sqlite3.Connection:
@@ -73,6 +75,10 @@ def _connect(db_path: Optional[Path] = None) -> sqlite3.Connection:
 def init_db(db_path: Optional[Path] = None) -> None:
     with _connect(db_path) as conn:
         conn.executescript(_SCHEMA)
+        # 마이그레이션 — 구버전 DB 에 url 컬럼 없으면 추가
+        cols = [r[1] for r in conn.execute("PRAGMA table_info(cal_events)").fetchall()]
+        if cols and "url" not in cols:
+            conn.execute("ALTER TABLE cal_events ADD COLUMN url TEXT DEFAULT ''")
 
 
 def _now() -> str:
@@ -90,6 +96,7 @@ def _row_to_event(row: sqlite3.Row) -> CalEvent:
         impact=row["impact"] or "mid", status=row["status"] or "todo",
         memo=row["memo"] or "", source=row["source"] or "manual",
         ext_key=row["ext_key"] or "", ref_id=row["ref_id"] or "", tags=tags,
+        url=(row["url"] if "url" in row.keys() else "") or "",
     )
 
 
@@ -97,7 +104,7 @@ def _row_to_event(row: sqlite3.Row) -> CalEvent:
 
 def upsert_auto(date: str, title: str, *, track: str, kind: str, impact: str,
                 source: str, ext_key: str, ref_id: str = "",
-                tags: Optional[List[str]] = None,
+                tags: Optional[List[str]] = None, url: str = "",
                 db_path: Optional[Path] = None) -> None:
     """자동 유입(외부규제/의무) — 이미 있으면 건드리지 않는다(상태·메모 보존)."""
     init_db(db_path)
@@ -105,11 +112,11 @@ def upsert_auto(date: str, title: str, *, track: str, kind: str, impact: str,
         conn.execute(
             "INSERT INTO cal_events "
             "(date, title, track, kind, impact, status, memo, source, ext_key, "
-            " ref_id, tags, created_at, updated_at) "
-            "VALUES (?, ?, ?, ?, ?, 'todo', '', ?, ?, ?, ?, ?, ?) "
+            " ref_id, tags, url, created_at, updated_at) "
+            "VALUES (?, ?, ?, ?, ?, 'todo', '', ?, ?, ?, ?, ?, ?, ?) "
             "ON CONFLICT(source, ext_key, date) DO NOTHING",
             (date, title, track, kind, impact, source, ext_key, ref_id,
-             json.dumps(tags or [], ensure_ascii=False), _now(), _now()),
+             json.dumps(tags or [], ensure_ascii=False), url, _now(), _now()),
         )
 
 
@@ -122,8 +129,8 @@ def add_manual(date: str, title: str, *, kind: str = "custom",
         cur = conn.execute(
             "INSERT INTO cal_events "
             "(date, title, track, kind, impact, status, memo, source, ext_key, "
-            " ref_id, tags, created_at, updated_at) "
-            "VALUES (?, ?, 'internal', ?, ?, 'todo', ?, 'manual', ?, '', '[]', ?, ?)",
+            " ref_id, tags, url, created_at, updated_at) "
+            "VALUES (?, ?, 'internal', ?, ?, 'todo', ?, 'manual', ?, '', '[]', '', ?, ?)",
             (date, title, kind, impact, memo,
              f"manual-{datetime.now().timestamp()}", _now(), _now()),
         )
@@ -199,7 +206,6 @@ def _dedup_external(db_path: Optional[Path] = None) -> int:
         for dup in groups.values():
             if len(dup) < 2:
                 continue
-            # 보존 우선순위: 상태/메모가 있는 행 → 가장 오래된 행
             touched = [r for r in dup if (r["status"] or "todo") != "todo"
                        or (r["memo"] or "")]
             keep = touched[0] if touched else dup[0]

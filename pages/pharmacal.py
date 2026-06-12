@@ -87,6 +87,33 @@ def render():
                 st.success("저장됨 — 취급 유형에 맞춰 의무 일정과 강조가 갱신됩니다.")
                 st.rerun()
 
+    # ---- 규제 레이더 (법제처 자동 수집)
+    with st.expander("🛰 규제 레이더 — 법제처에서 의약품 제·개정 자동 수집", expanded=False):
+        try:
+            from data_layer.regulatory import radar
+            meta = radar.last_crawl()
+            if meta and meta.get("ok"):
+                st.caption(f"마지막 수집: {meta.get('at','')} · 검색 {meta.get('checked',0)}건 "
+                           f"→ 대상 {meta.get('matched',0)}건 → 신규 {meta.get('added',0)}건")
+            elif meta:
+                st.caption(f"마지막 시도 실패: {meta.get('reason','')}")
+            else:
+                st.caption("아직 수집 이력 없음 — 아래 버튼으로 첫 수집을 실행하세요.")
+            st.caption("감시 대상: 약사법·마약류관리법·안전규칙·생물학적제제 규칙 + "
+                       "KGSP 등 행정규칙 (동물용·의료기기 제외). "
+                       "매일 자동 수집은 `scripts.daily_digest` 스케줄 등록 시 함께 돕니다.")
+            if st.button("🛰 지금 수집 실행", key="cal_radar_run", type="primary"):
+                with st.spinner("법제처 검색 중… (10~20초)"):
+                    res = radar.crawl()
+                if res.get("ok"):
+                    st.success(f"수집 완료 — 검색 {res['checked']}건 → 윈도우 내 대상 "
+                               f"{res['matched']}건 → 캘린더 신규 {res['added']}건")
+                    st.rerun()
+                else:
+                    st.error(f"수집 실패: {res.get('reason','네트워크 오류')}")
+        except Exception as e:  # noqa: BLE001
+            st.caption(f"레이더 모듈 오류: {type(e).__name__}")
+
     now = datetime.now()
 
     # ---- KPI 지표 카드
@@ -381,6 +408,9 @@ def _event_modal_body(ev, profile):
             st.markdown(f"메모: {ev.memo}")
         query = re.sub(r"(개정 예고|행정 예고|시행)", "", ev.title).strip(" ·")[:30]
         toks = re.findall(r"[가-힣A-Za-z]{2,}", ev.title)[:4]
+
+    if ev.url:
+        st.markdown(f"[🔗 규제 원문 보기 (law.go.kr)]({ev.url})")
 
     news = _recent_news(days=14, limit=3, query_tokens=toks)
     if news:

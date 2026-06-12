@@ -111,7 +111,17 @@ def build_digest(*, news_days: int = 1, reg_window: int = 30,
             lines.append(f"- **{d}** ({dtxt}) · {kind} — {title}")
     lines.append("")
 
-    # (3) 개정 영향 알림 — 미확인 리포트가 있을 때만 섹션 추가
+    # (3) 새로 감지된 제·개정 (규제 레이더) — 최근 수집분이 있을 때만
+    try:
+        from data_layer.regulatory.radar import digest_lines as _radar_lines
+        radar = _radar_lines()
+        if radar:
+            lines.extend(radar)
+            lines.append("")
+    except Exception:
+        pass
+
+    # (4) 개정 영향 알림 — 미확인 리포트가 있을 때만 섹션 추가
     try:
         from engines.impact_engine import digest_lines
         impact = digest_lines(limit=5)
