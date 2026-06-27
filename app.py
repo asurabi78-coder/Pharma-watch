@@ -53,19 +53,10 @@ PAGES = {
     "newsroom":   ["뉴스 모니터링", "pages.newsroom"],
     "regulatory": ["규제 검색",     "pages.regulatory"],
     "qa_analyst": ["QA 분석가",     "pages.qa_analyst"],
-    "sop_compare": ["SOP 자동비교",  "pages.sop_compare"],
-    "impact":     ["개정 영향분석", "pages.impact"],
-    "sop_generator": ["SOP 생성기",   "pages.sop_generator"],
-    "training":   ["교육·평가",      "pages.training"],
-    "rag_assistant": ["법령 어시스턴트", "pages.rag_assistant"],
-    "usage":      ["사용량",        "pages.usage"],  # 관리자 전용 — 메뉴는 아래에서 별도 노출
 }
 
 # 일반 메뉴에 표시하지 않는 페이지 (관리자 전용 등)
-_HIDDEN_FROM_MENU = {"usage"}
-
-# 상위(유료) 기능 — 화면엔 보이되 잠금. (원칙 5·6)
-LOCKED = ["CAPA 자동작성", "대화형 QA 질의"]
+_HIDDEN_FROM_MENU = set()
 
 
 if "page" not in st.session_state:
@@ -109,20 +100,6 @@ with st.sidebar:
         if k in _HIDDEN_FROM_MENU:
             continue
         _nav_button(k, info[0])
-
-    # 관리자 전용 — 사용량 메뉴
-    try:
-        from ui.auth import is_admin as _is_admin
-        if _is_admin():
-            _nav_button("usage", "📊 사용량")
-    except Exception:
-        pass
-
-    st.markdown("---")
-    st.caption("프리미엄 🔒")
-    for name in LOCKED:
-        st.button(f"🔒 {name}", use_container_width=True, disabled=True, key="locked_" + name)
-    st.caption("상위 플랜에서 잠금 해제")
 
     st.markdown("---")
     try:

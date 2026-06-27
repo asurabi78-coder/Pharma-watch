@@ -9,10 +9,6 @@ _CARDS = [
     ("📰 뉴스 모니터링", "데일리팜·약업신문·물류신문 자동 수집", "newsroom"),
     ("🔍 규제 검색", "KGSP·GDP·GMP 원문 검색", "regulatory"),
     ("🤖 QA 분석가", "규제·뉴스의 QA 영향도 + Action Item 추천", "qa_analyst"),
-    ("📑 SOP 자동비교", "내부 SOP의 규제 충족도를 절 단위로 점검", "sop_compare"),
-    ("⚠️ 개정 영향분석", "규제가 바뀌면 등록된 SOP 전체를 자동 재점검", "impact"),
-    ("📄 SOP 생성기", "회사 양식 그대로 KGSP 충족 SOP 초안을 워드로", "sop_generator"),
-    ("📝 교육·평가", "KGSP 교육용 시험지+교육일지를 워드로 자동 생성", "training"),
 ]
 
 
@@ -49,7 +45,6 @@ def render():
 
     st.markdown("---")
     st.caption(
-        "무료 플랜: 규제 캘린더 · 뉴스 모니터링 · 알림 · Action Item 추천. "
-        "🔒 SOP 자동비교 · CAPA 자동작성 · 대화형 QA 질의는 상위 플랜입니다."
+        "규제 캘린더 · 뉴스 모니터링 · 규제 검색 · QA 분석가를 한곳에서."
     )
     st.caption(branding.FOOTER_NOTE)

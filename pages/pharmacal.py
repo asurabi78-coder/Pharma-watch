@@ -453,7 +453,7 @@ def _event_card(ev, profile, *, prefix: str = "", show_detail: bool = False):
                          use_container_width=True):
                 _event_modal(ev, profile)
 
-        ctl = st.columns([3, 3, 2, 2])
+        ctl = st.columns([3, 3, 2])
         with ctl[0]:
             cur = ev.status if ev.status in repo.STATUS_LABEL else "todo"
             new_status = st.selectbox(
@@ -471,11 +471,6 @@ def _event_card(ev, profile, *, prefix: str = "", show_detail: bool = False):
             if memo != ev.memo:
                 repo.update_event(ev.id, memo=memo)
         with ctl[2]:
-            if ev.track == "external" and ev.ref_id:
-                if st.button("📑 SOP 비교", key=f"cal{prefix}_sop_{ev.id}",
-                             use_container_width=True):
-                    _goto_sop_compare(ev.ref_id)
-        with ctl[3]:
             if ev.track == "internal":
                 if st.button("🗑️", key=f"cal{prefix}_del_{ev.id}",
                              use_container_width=True):
@@ -493,20 +488,6 @@ def _event_card(ev, profile, *, prefix: str = "", show_detail: bool = False):
 
         if st.session_state.get("cal_share_target") == (prefix, ev.id):
             _share_panel(ev, profile, prefix)
-
-
-def _goto_sop_compare(ref_id: str):
-    try:
-        from data_layer.regulatory.seed import SEED_ENTRIES
-        idx = next((i for i, e in enumerate(SEED_ENTRIES) if e.id == ref_id), None)
-        if idx is not None:
-            st.session_state["sopc_seed_idx"] = idx
-            st.session_state["sopc_mode"] = "시드 규제에서 선택"
-    except Exception:
-        pass
-    st.session_state.setdefault("nav_history", []).append("pharmacal")
-    st.session_state.page = "sop_compare"
-    st.rerun()
 
 
 def _share_panel(ev, profile, prefix: str = ""):

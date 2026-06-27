@@ -44,18 +44,6 @@ def main(argv=None) -> int:
     except Exception as e:  # noqa: BLE001
         print(f"[radar] 실패(무시): {type(e).__name__}: {e}", file=sys.stderr)
 
-    # 개정 영향 스캔 — 변경 감지 시 SOP 영향 리포트 생성 (실패해도 다이제스트는 진행)
-    try:
-        from engines.impact_engine import run_scan
-        res = run_scan()
-        if res.baseline:
-            print(f"[impact] 기준선 저장 — 규제 {res.regs_checked}건", file=sys.stderr)
-        else:
-            print(f"[impact] 변경 {len(res.changes)}건 / 리포트 {len(res.reports)}건",
-                  file=sys.stderr)
-    except Exception as e:  # noqa: BLE001
-        print(f"[impact] 실패(무시): {type(e).__name__}: {e}", file=sys.stderr)
-
     md = digest.build_digest()
     print(md)
 

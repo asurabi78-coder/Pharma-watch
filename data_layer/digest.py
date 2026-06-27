@@ -121,16 +121,6 @@ def build_digest(*, news_days: int = 1, reg_window: int = 30,
     except Exception:
         pass
 
-    # (4) 개정 영향 알림 — 미확인 리포트가 있을 때만 섹션 추가
-    try:
-        from engines.impact_engine import digest_lines
-        impact = digest_lines(limit=5)
-        if impact:
-            lines.extend(impact)
-            lines.append("")
-    except Exception:
-        pass
-
     lines.append("---")
     lines.append("_결정론적 자동 생성 — Pharma Watch. 상세는 앱에서 확인하세요._")
     return "\n".join(lines)
