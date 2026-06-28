@@ -53,6 +53,7 @@ PAGES = {
     "newsroom":   ["뉴스 모니터링", "pages.newsroom"],
     "regulatory": ["규제 검색",     "pages.regulatory"],
     "qa_analyst": ["QA 분석가",     "pages.qa_analyst"],
+    "qa_community": ["QA 커뮤니티",  "pages.qa_community"],
 }
 
 # 일반 메뉴에 표시하지 않는 페이지 (관리자 전용 등)

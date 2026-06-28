@@ -20,3 +20,17 @@ class NewsItem:
     tags: List[str] = field(default_factory=list)
     thumbnail: Optional[str] = None  # 썸네일 URL (있으면)
     importance: str = ""             # 결정론적 중요도: high / mid / low (빈값=미평가)
+    # ── 분류 체계 확장 (추가 전용) ──
+    source_type: str = ""            # official / media / association / unknown
+    source_domain: str = ""
+    official_source_url: str = ""
+    biz_category: str = ""           # 업무 카테고리(대표 1개)
+    is_urgent: bool = False
+    urgent_candidate: bool = False   # (메모리 전용) 긴급 후보
+    verification_status: str = ""    # official_confirmed / checking / ""
+    qa_relevance_score: int = 0
+    qa_impact: str = ""
+    action_items: str = ""
+    affected_work: str = ""
+    duplicate_group_id: str = ""
+    content_hash: str = ""

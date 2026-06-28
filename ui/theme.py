@@ -65,6 +65,23 @@ THEMES = {
         "warn": "#F5B45A", "warn_soft": "#3D3017",
         "danger": "#F08A82", "danger_soft": "#3D2020",
     },
+    "라이트 (Pharma)": {
+        "bg_0": "#FFFFFF", "bg_1": "#FFFFFF", "bg_2": "#F4F7FC",
+        "border": "#E6EBF3", "border_strong": "#D5DDEC",
+        "text": "#1C2A46", "text_2": "#5B6A86", "text_3": "#93A0B8",
+        "accent": "#2D5BD6", "accent_soft": "#E7EEFC",
+        "qa": "#12B5A5", "qa_soft": "#DFF6F2",
+        "warn": "#C0790F", "warn_soft": "#FDF0DC",
+        "danger": "#D8453E", "danger_soft": "#FBE7E6",
+        # 사이드바: 다크 네이비 + 흰 글씨 + 플랫 메뉴 (목업 재현)
+        "sidebar_bg": "#0E1B3A",
+        "sidebar_text": "#FFFFFF",
+        "sidebar_text_dim": "#A8B3CC",
+        "sidebar_btn_bg": "transparent",
+        "sidebar_btn_border": "transparent",
+        "sidebar_btn_hover_bg": "#17264A",
+        "sidebar_btn_hover_border": "#17264A",
+    },
 }
 
 # 규제 캘린더(PharmaCal HTML)의 색 변수 override — 액센트/헤더만 교체,
@@ -83,9 +100,13 @@ CAL_OVERRIDES = {
         "teal": "#34D6C8", "teal-bright": "#5FE6DA", "teal-glow": "rgba(52,214,200,0.35)",
         "navy-900": "#10182E", "navy-800": "#18203A", "navy-700": "#222C49",
     },
+    "라이트 (Pharma)": {
+        "teal": "#2D5BD6", "teal-bright": "#4D78E8", "teal-glow": "rgba(45,91,214,0.30)",
+        "navy-900": "#0E1B3A", "navy-800": "#16264A", "navy-700": "#22335E",
+    },
 }
 
-_DEFAULT_THEME = "네이비 (기본)"
+_DEFAULT_THEME = "라이트 (Pharma)"
 _PREF_PATH = Path(__file__).resolve().parent.parent / "db" / "ui_theme.txt"
 
 
@@ -137,8 +158,23 @@ def _sanitize_css_for_style_tag(css: str) -> str:
 def inject_dark_theme():
     """선택된 테마 + 타이포 + Streamlit 위젯 오버라이드."""
     t = get_active_tokens()
+    # 사이드바 전용 토큰 — 미지정 테마는 기존 동작(본문 토큰)으로 폴백해 외형 불변.
+    sb_bg = t.get('sidebar_bg', t['bg_1'])
+    sb_text = t.get('sidebar_text', t['text'])
+    sb_text_dim = t.get('sidebar_text_dim', t['text'])
+    sb_btn_bg = t.get('sidebar_btn_bg', t['bg_2'])
+    sb_btn_border = t.get('sidebar_btn_border', t['border'])
+    sb_btn_hover_bg = t.get('sidebar_btn_hover_bg', t['accent_soft'])
+    sb_btn_hover_border = t.get('sidebar_btn_hover_border', t['accent'])
     css = f"""
 :root {{
+    --sidebar-bg: {sb_bg};
+    --sidebar-text: {sb_text};
+    --sidebar-text-dim: {sb_text_dim};
+    --sidebar-btn-bg: {sb_btn_bg};
+    --sidebar-btn-border: {sb_btn_border};
+    --sidebar-btn-hover-bg: {sb_btn_hover_bg};
+    --sidebar-btn-hover-border: {sb_btn_hover_border};
     --bg-0: {t['bg_0']};
     --bg-1: {t['bg_1']};
     --bg-2: {t['bg_2']};
@@ -253,7 +289,7 @@ header [data-testid="stHeaderActionElements"] {{ visibility: hidden; }}
 
 /* ── 사이드바 ── */
 [data-testid="stSidebar"] {{
-    background: var(--bg-1) !important;
+    background: var(--sidebar-bg) !important;
     border-right: 1px solid var(--border) !important;
     display: block !important;
     visibility: visible !important;
@@ -265,11 +301,11 @@ header [data-testid="stHeaderActionElements"] {{ visibility: hidden; }}
     z-index: 999999 !important;
     pointer-events: auto !important;
 }}
-[data-testid="stSidebar"] * {{ color: var(--text) !important; }}
+[data-testid="stSidebar"] * {{ color: var(--sidebar-text) !important; }}
 [data-testid="stSidebar"] .stButton button {{
-    background: var(--bg-2) !important;
-    border: 1px solid var(--border) !important;
-    color: var(--text) !important;
+    background: var(--sidebar-btn-bg) !important;
+    border: 1px solid var(--sidebar-btn-border) !important;
+    color: var(--sidebar-text) !important;
     border-radius: 8px !important;
     font-family: 'Noto Sans KR', sans-serif !important;
     font-weight: 500 !important;
@@ -277,9 +313,24 @@ header [data-testid="stHeaderActionElements"] {{ visibility: hidden; }}
     transition: all 0.15s !important;
 }}
 [data-testid="stSidebar"] .stButton button:hover {{
-    background: var(--accent-soft) !important;
-    border-color: var(--accent) !important;
-    color: var(--text) !important;
+    background: var(--sidebar-btn-hover-bg) !important;
+    border-color: var(--sidebar-btn-hover-border) !important;
+    color: var(--sidebar-text) !important;
+}}
+/* 사이드바 글자색 고정 — 전역 마크다운/캡션 규칙보다 높은 특이도로 덮어쓴다.
+   (기존 테마는 --sidebar-text 가 --text 로 폴백되어 종전과 동일) */
+[data-testid="stSidebar"] [data-testid="stMarkdownContainer"],
+[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p,
+[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] span,
+[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] strong,
+[data-testid="stSidebar"] .stButton button p,
+[data-testid="stSidebar"] [data-testid="stWidgetLabel"],
+[data-testid="stSidebar"] [data-testid="stWidgetLabel"] p {{
+    color: var(--sidebar-text) !important;
+}}
+[data-testid="stSidebar"] [data-testid="stCaptionContainer"],
+[data-testid="stSidebar"] [data-testid="stCaptionContainer"] * {{
+    color: var(--sidebar-text-dim) !important;
 }}
 
 /* ── 제목 타이포 ── */
