@@ -47,12 +47,6 @@ def _log(action: str, detail: str) -> None:
 
 # ── 렌더 진입점 ──────────────────────────────────────────────────────────
 def render():
-    st.title("💬 QA 커뮤니티")
-    st.caption(
-        "제약·의약품 유통 QA 담당자끼리 실무 질문과 경험을 나누는 공간입니다. "
-        "(규정 기반 즉시 답변이 필요하면 ‘QA 분석가’를 이용하세요.)"
-    )
-
     st.session_state.setdefault("qc_view", "list")
     st.session_state.setdefault("qc_qid", None)
 
@@ -76,29 +70,54 @@ def _go_detail(qid: int):
 def _render_list():
     admin = is_admin()
 
-    # 질문 작성
-    with st.expander("✍️ 질문 작성", expanded=st.session_state.pop("qc_open_write", False)):
-        with st.form("qc_new_q", clear_on_submit=True):
-            title = st.text_input("제목", key="qc_q_title",
-                                  placeholder="예: 냉장 의약품 입고 시 온도 일탈 처리 절차 문의")
-            category = st.selectbox("카테고리", qc.CATEGORIES, key="qc_q_cat")
-            body = st.text_area("내용", height=140, key="qc_q_body",
-                                placeholder="상황과 궁금한 점을 구체적으로 적어주세요.")
-            submitted = st.form_submit_button("질문 등록", type="primary")
-            if submitted:
-                if not title.strip() or not body.strip():
-                    st.warning("제목과 내용을 모두 입력하세요.")
-                else:
-                    try:
-                        qid = qc.create_question(
-                            title, body, category, user=current_user()
-                        )
-                        _log("질문등록", title.strip())
-                        st.success("질문이 등록되었습니다.")
-                        _go_detail(qid)
-                        st.rerun()
-                    except Exception as e:  # noqa: BLE001
-                        st.error(f"등록 실패: {type(e).__name__}: {e}")
+    # ── 헤더: 제목(축소) + 우상단 '질문 작성' 버튼 ──
+    hc = st.columns([4, 1])
+    with hc[0]:
+        st.markdown(
+            "<div style='font-size:1.55rem;font-weight:700;line-height:1.2;'>"
+            "QA 커뮤니티</div>",
+            unsafe_allow_html=True,
+        )
+        st.caption(
+            "제약·의약품 유통 QA 담당자끼리 실무 질문과 경험을 나누는 공간입니다. "
+            "(규정 기반 즉시 답변이 필요하면 ‘QA 분석가’를 이용하세요.)"
+        )
+    with hc[1]:
+        st.write("")
+        if st.button("✚ 질문 작성", type="primary", use_container_width=True,
+                     key="qc_new_btn"):
+            st.session_state["qc_show_write"] = not st.session_state.get(
+                "qc_show_write", False
+            )
+            st.rerun()
+
+    if st.session_state.pop("qc_open_write", False):
+        st.session_state["qc_show_write"] = True
+
+    if st.session_state.get("qc_show_write"):
+        with st.container(border=True):
+            with st.form("qc_new_q", clear_on_submit=True):
+                title = st.text_input("제목", key="qc_q_title",
+                                      placeholder="예: 냉장 의약품 입고 시 온도 일탈 처리 절차 문의")
+                category = st.selectbox("카테고리", qc.CATEGORIES, key="qc_q_cat")
+                body = st.text_area("내용", height=140, key="qc_q_body",
+                                    placeholder="상황과 궁금한 점을 구체적으로 적어주세요.")
+                submitted = st.form_submit_button("질문 등록", type="primary")
+                if submitted:
+                    if not title.strip() or not body.strip():
+                        st.warning("제목과 내용을 모두 입력하세요.")
+                    else:
+                        try:
+                            qid = qc.create_question(
+                                title, body, category, user=current_user()
+                            )
+                            _log("질문등록", title.strip())
+                            st.success("질문이 등록되었습니다.")
+                            st.session_state["qc_show_write"] = False
+                            _go_detail(qid)
+                            st.rerun()
+                        except Exception as e:  # noqa: BLE001
+                            st.error(f"등록 실패: {type(e).__name__}: {e}")
 
     # 필터 줄
     fc1, fc2, fc3 = st.columns([2, 2, 1.2])
@@ -121,7 +140,31 @@ def _render_list():
         st.error(f"목록을 불러오지 못했습니다: {type(e).__name__}: {e}")
         return
 
-    st.markdown(f"**질문 {len(questions)}건**")
+    # ── 인기 질문 (조회순 상위 3) — 검색 중이 아닐 때만 ──
+    try:
+        popular = qc.list_questions(
+            category=qc.CATEGORY_ALL, search="", sort="views",
+            include_hidden=False,
+        )[:3]
+    except Exception:
+        popular = []
+    if popular and not (search or "").strip():
+        st.markdown("**인기 질문**")
+        pcols = st.columns(len(popular))
+        for _i, _pq in enumerate(popular):
+            with pcols[_i]:
+                with st.container(border=True):
+                    st.caption(_pq.category)
+                    _pt = _pq.title if len(_pq.title) <= 38 else _pq.title[:38] + "…"
+                    st.markdown(f"**{_pt}**")
+                    st.caption(f"조회 {_pq.views} · 답변 {_pq.answer_count}")
+                    if st.button("보기", key=f"qc_pop_{_pq.id}",
+                                 use_container_width=True):
+                        _go_detail(_pq.id)
+                        st.rerun()
+        st.markdown("")
+
+    st.markdown(f"**전체 질문 {len(questions)}건**")
     st.markdown("---")
 
     if not questions:

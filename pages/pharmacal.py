@@ -27,9 +27,9 @@ _dialog = getattr(st, "dialog", None) or getattr(st, "experimental_dialog", None
 
 _STAGE_COLORS = {
     "시행예정": ["#FDECEC", "#C0392B"], "의견마감": ["#FCF3DD", "#B9770E"],
-    "공포·고시": ["#E7EEFC", "#2D5BD6"], "안내 적용": ["#E3F4EC", "#1B8A5A"],
+    "공포·고시": ["#E7EEFC", "#2563EB"], "안내 적용": ["#E3F4EC", "#1B8A5A"],
     "검토중": ["#EEF1F5", "#6B7480"], "시행": ["#EEF1F5", "#6B7480"],
-    "KGSP 의무": ["#E7EEFC", "#2D5BD6"], "사내": ["#F0EAF8", "#7A4FB5"],
+    "KGSP 의무": ["#E7EEFC", "#2563EB"], "사내": ["#F0EAF8", "#7A4FB5"],
 }
 
 
@@ -161,44 +161,45 @@ def _build_payload(year, month, profile, user):
 
 _TEMPLATE = """<!doctype html><html><head><meta charset='utf-8'>
 <link href='https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap' rel='stylesheet'>
+<link rel='stylesheet' href='https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css'>
 <style>
 *{box-sizing:border-box;} html,body{margin:0;}
-body{font-family:'Noto Sans KR',system-ui,sans-serif;color:#1C2A46;background:#fff;}
+body{font-family:'Pretendard','Noto Sans KR',system-ui,sans-serif;color:#0F172A;background:#fff;font-size:14px;}
 .wrap{padding:4px 2px 18px;}
 .hd{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;gap:10px;}
 .title{font-size:24px;font-weight:700;}
-.sub{font-size:13px;color:#5B6A86;margin-top:3px;}
-.addbtn{background:#2D5BD6;color:#fff;border-radius:8px;padding:9px 14px;font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;}
+.sub{font-size:13px;color:#475569;margin-top:3px;}
+.addbtn{background:#2563EB;color:#fff;border-radius:8px;padding:9px 14px;font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;}
 .filters{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
-.chip{font-size:12px;padding:5px 11px;border-radius:8px;border:1px solid #E6EBF3;background:#fff;color:#5B6A86;cursor:pointer;}
-.chip.on{background:#2D5BD6;color:#fff;border-color:#2D5BD6;}
+.chip{font-size:12px;padding:5px 11px;border-radius:8px;border:1px solid #D7DFEA;background:#fff;color:#475569;cursor:pointer;}
+.chip.on{background:#2563EB;color:#fff;border-color:#2563EB;}
 .srch{margin-left:auto;display:flex;gap:6px;}
-.srch select,.srch input{border:1px solid #E6EBF3;border-radius:8px;padding:6px 10px;font-size:12px;font-family:inherit;color:#1C2A46;}
+.srch select,.srch input{border:1px solid #D7DFEA;border-radius:8px;padding:6px 10px;font-size:12px;font-family:inherit;color:#0F172A;}
 .nav{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
-.nav .b{color:#5B6A86;font-size:15px;border:1px solid #E6EBF3;border-radius:7px;padding:2px 10px;cursor:pointer;}
-.nav .m{font-size:18px;font-weight:700;color:#1C2A46;}
+.nav .b{color:#475569;font-size:15px;border:1px solid #D7DFEA;border-radius:7px;padding:2px 10px;cursor:pointer;}
+.nav .m{font-size:18px;font-weight:700;color:#0F172A;}
 .layout{display:flex;gap:14px;align-items:flex-start;}
-.calbox{flex:1.7;min-width:0;}
+.calbox{flex:2.33;min-width:0;}
 .side{flex:1;min-width:240px;}
 .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
-.gh{text-align:center;font-size:12px;color:#93A0B8;padding-bottom:2px;}
-.cell{min-height:96px;border:0.5px solid #E6EBF3;border-radius:8px;padding:5px 6px;overflow:hidden;}
+.gh{text-align:center;font-size:12px;color:#94A3B8;padding-bottom:2px;}
+.cell{min-height:118px;border:1px solid #D7DFEA;border-radius:8px;padding:6px 7px;overflow:hidden;}
 .cell.empty{border:none;}
-.dn{font-size:12px;font-weight:500;color:#5B6A86;}
-.dn.today{background:#2D5BD6;color:#fff;border-radius:999px;padding:1px 6px;}
-.pill{margin-top:4px;font-size:11px;line-height:1.25;border-left:3px solid;border-radius:0 4px 4px 0;padding:3px 5px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.card{background:#fff;border:0.5px solid #E6EBF3;border-radius:12px;padding:14px 16px;margin-bottom:12px;}
+.dn{font-size:12px;font-weight:500;color:#475569;}
+.dn.today{background:#2563EB;color:#fff;border-radius:999px;padding:1px 6px;}
+.pill{margin-top:4px;font-size:11px;line-height:1.3;border-left:3px solid;border-radius:0 4px 4px 0;padding:3px 5px;cursor:pointer;white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.card{background:#fff;border:0.5px solid #D7DFEA;border-radius:12px;padding:14px 16px;margin-bottom:12px;}
 .badge{font-size:12px;padding:3px 10px;border-radius:8px;}
 .row{display:flex;justify-content:space-between;font-size:13px;padding:3px 0;}
-.muted{color:#93A0B8;}
-.wait{display:flex;align-items:center;gap:8px;background:#E7EEFC;color:#2D5BD6;border-radius:8px;padding:8px 12px;font-size:13px;margin:8px 0;}
+.muted{color:#94A3B8;}
+.wait{display:flex;align-items:center;gap:8px;background:#E7EEFC;color:#2563EB;border-radius:8px;padding:8px 12px;font-size:13px;margin:8px 0;}
 .sec{font-size:14px;font-weight:700;margin-top:12px;}
 .act{display:flex;gap:8px;margin-top:14px;}
 .act div{flex:1;text-align:center;border-radius:8px;padding:9px;font-size:13px;cursor:pointer;}
-.act .qa{background:#2D5BD6;color:#fff;}
-.act .star{border:1px solid #E6EBF3;color:#1C2A46;}
-.upitem{border:0.5px solid #E6EBF3;border-radius:8px;padding:8px 10px;margin-bottom:6px;cursor:pointer;}
-.lk{color:#2D5BD6;cursor:pointer;}
+.act .qa{background:#2563EB;color:#fff;}
+.act .star{border:1px solid #D7DFEA;color:#0F172A;}
+.upitem{border:0.5px solid #D7DFEA;border-radius:8px;padding:8px 10px;margin-bottom:6px;cursor:pointer;}
+.lk{color:#2563EB;cursor:pointer;}
 </style></head><body><div class='wrap'>
 <div class='hd'><div><div class='title'>규제 캘린더</div>
 <div class='sub'>의약품 유통·수입·보관 업무에 영향을 주는 예정 일정을 확인합니다.</div></div>
@@ -244,7 +245,7 @@ function renderGrid(){
     its.slice(0,2).forEach(function(it){var cc=col(it.stage);var p=el('div','pill',it.name);
       p.style.borderLeftColor=cc[1];p.style.background=cc[0];p.style.color=cc[1];p.title=it.name;
       p.onclick=function(){curSel=it.id;renderSide();};cell.appendChild(p);});
-    if(its.length>2){var mm=el('div',null,'+'+(its.length-2)+'건');mm.style.cssText='font-size:10px;color:#93A0B8;margin-top:2px;';cell.appendChild(mm);}
+    if(its.length>2){var mm=el('div',null,'+'+(its.length-2)+'건');mm.style.cssText='font-size:10px;color:#94A3B8;margin-top:2px;';cell.appendChild(mm);}
     g.appendChild(cell);
   });
 }
@@ -261,7 +262,7 @@ function renderSide(){
       "<span class='muted' style='font-size:12px;'>"+b.dday+"</span></div>"+
       "<div style='font-size:18px;font-weight:700;line-height:1.35;margin-bottom:8px;'>"+b.title+"</div>"+
       "<div class='muted' style='font-size:12px;margin-bottom:8px;'>소관기관: "+b.org+" · 공고번호: "+b.no+"</div>"+
-      "<div style='border-top:0.5px solid #E6EBF3;padding-top:6px;'>"+row("공고일",b.notice)+row("의견마감일",b.deadline)+row("시행일",b.eff)+"</div>"+
+      "<div style='border-top:0.5px solid #D7DFEA;padding-top:6px;'>"+row("공고일",b.notice)+row("의견마감일",b.deadline)+row("시행일",b.eff)+"</div>"+
       (b.analyzed?"":"<div class='wait'>🕓 원문 확인 가능 · QA 분석 대기</div>")+
       "<div class='sec'>개정 핵심 내용</div>"+core+
       "<div class='sec'>영향받는 업무 · 대상</div>"+imp+
@@ -284,15 +285,22 @@ function renderSide(){
       it.onclick=function(){curSel=u.id;renderSide();};c1.appendChild(it);});
     s.appendChild(c1);
     var c2=el('div','card');c2.innerHTML="<div style='font-weight:700;margin-bottom:6px;'>일정 표시 기준</div>"+
-      "<div style='font-size:12px;color:#5B6A86;'>● 확정 일정 — 원문에 날짜가 명시됨</div>"+
-      "<div style='font-size:12px;color:#5B6A86;'>○ 검토 중 — 예정일이 아직 확정되지 않음</div>"+
-      "<div style='font-size:12px;color:#5B6A86;margin-top:6px;'>🔴 시행예정 · 🟡 의견마감 · 🔵 공포·고시 · 🟢 안내 적용 · ⚪ 검토중</div>";
+      "<div style='font-size:12px;color:#475569;'>● 확정 일정 — 원문에 날짜가 명시됨</div>"+
+      "<div style='font-size:12px;color:#475569;'>○ 검토 중 — 예정일이 아직 확정되지 않음</div>"+
+      "<div style='font-size:12px;color:#475569;margin-top:6px;display:flex;flex-wrap:wrap;gap:10px;'>"+
+      "<span><span style='color:#D8453E;'>●</span> 시행예정</span>"+
+      "<span><span style='color:#C0790F;'>●</span> 의견마감</span>"+
+      "<span><span style='color:#2563EB;'>●</span> 공포·고시</span>"+
+      "<span><span style='color:#0E7C5A;'>●</span> 안내 적용</span>"+
+      "<span><span style='color:#94A3B8;'>●</span> 검토중</span></div>";
     s.appendChild(c2);
   }
 }
 document.getElementById('addbtn').onclick=function(){act('manage');};
 renderFilters();renderNav();renderGrid();renderSide();
 hideBridges();var _hb=setInterval(hideBridges,400);setTimeout(function(){clearInterval(_hb);},8000);
+function _fit(){try{var h=document.body.scrollHeight;if(window.frameElement){window.frameElement.style.height=h+'px';window.frameElement.style.minHeight=h+'px';}}catch(e){}}
+_fit();window.addEventListener('load',_fit);setTimeout(_fit,300);setTimeout(_fit,900);
 </script></body></html>"""
 
 
@@ -398,7 +406,7 @@ def render():
     year, month = ym[0], ym[1]
 
     payload = _build_payload(year, month, profile, user)
-    components.html(_calendar_html(payload), height=820, scrolling=True)
+    components.html(_calendar_html(payload), height=940, scrolling=False)
 
     _quick_actions(payload, user, _bills)
 

@@ -122,22 +122,37 @@ def _render_recent_updates():
             st.caption("예정된 규제 일정이 없습니다. (시드/수집 후 표시됩니다)")
         return
 
+    from datetime import datetime as _dt
+    _today = _dt.now().date()
+
+    def _dday(ds):
+        try:
+            d = (_dt.strptime(ds, "%Y-%m-%d").date() - _today).days
+            return "오늘" if d == 0 else (f"D-{d}" if d > 0 else f"D+{-d}")
+        except Exception:
+            return ""
+
     with st.container(border=True):
         for idx, (date, kind, title) in enumerate(rows):
             tag = _KIND_TAG.get(kind, kind or "안내")
-            disp = title if len(title) <= 42 else title[:42] + "…"
+            disp = title if len(title) <= 40 else title[:40] + "…"
+            dd = _dday(date)
+            urgent = dd.startswith("D-") and dd[2:].isdigit() and int(dd[2:]) <= 14
+            ddcol = "var(--danger)" if urgent else "var(--text-3)"
             st.markdown(
-                f"<div style='display:flex;align-items:center;justify-content:space-between;"
-                f"gap:10px;padding:2px 0;'>"
-                f"<span style='font-size:13.5px;color:var(--text);'>{disp} "
-                f"{_chip(tag, fg='var(--warn)', bg='var(--warn-soft)')}</span>"
-                f"<span style='font-size:12px;color:var(--text-3);white-space:nowrap;'>{date}</span>"
-                f"</div>",
+                "<div style='display:grid;grid-template-columns:74px 1fr 90px 52px;gap:10px;"
+                "align-items:center;padding:7px 0;font-size:13px;'>"
+                f"{_chip(tag, fg='var(--warn)', bg='var(--warn-soft)')}"
+                f"<span style='color:var(--text);overflow:hidden;text-overflow:ellipsis;"
+                f"white-space:nowrap;'>{disp}</span>"
+                f"<span style='color:var(--text-2);font-size:12px;'>{date}</span>"
+                f"<span style='color:{ddcol};font-size:12px;font-weight:600;text-align:right;'>{dd}</span>"
+                "</div>",
                 unsafe_allow_html=True,
             )
             if idx < len(rows) - 1:
                 st.markdown(
-                    "<div style='border-top:1px solid var(--border);margin:6px 0;'></div>",
+                    "<div style='border-top:1px solid var(--border);'></div>",
                     unsafe_allow_html=True,
                 )
 

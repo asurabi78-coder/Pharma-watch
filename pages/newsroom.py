@@ -88,31 +88,32 @@ def _build_payload(period_days):
 
 _TEMPLATE = """<!doctype html><html><head><meta charset='utf-8'>
 <link href='https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap' rel='stylesheet'>
+<link rel='stylesheet' href='https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css'>
 <style>
 *{box-sizing:border-box;}html,body{margin:0;}
-body{font-family:'Noto Sans KR',system-ui,sans-serif;color:#1C2A46;background:#fff;}
+body{font-family:'Pretendard','Noto Sans KR',system-ui,sans-serif;color:#0F172A;background:#fff;font-size:14px;}
 .wrap{padding:4px 2px 18px;}
 .hd{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;gap:10px;}
 .title{font-size:22px;font-weight:700;}
-.sub{font-size:13px;color:#5B6A86;margin-top:2px;}
-.rf{font-size:12px;color:#5B6A86;cursor:pointer;white-space:nowrap;}
+.sub{font-size:13px;color:#475569;margin-top:2px;}
+.rf{font-size:12px;color:#475569;cursor:pointer;white-space:nowrap;}
 .bar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:4px;}
-.st{font-size:13px;padding:6px 12px;border-radius:8px;border:1px solid #E6EBF3;color:#5B6A86;cursor:pointer;background:#fff;}
-.st.on{background:#2D5BD6;color:#fff;border-color:#2D5BD6;}
+.st{font-size:13px;padding:6px 12px;border-radius:8px;border:1px solid #D7DFEA;color:#475569;cursor:pointer;background:#fff;}
+.st.on{background:#2563EB;color:#fff;border-color:#2563EB;}
 .urg{font-size:13px;padding:6px 11px;border-radius:8px;border:1px solid #E6A6A6;color:#C0392B;cursor:pointer;display:inline-flex;gap:5px;align-items:center;}
 .urg.on{background:#FDECEC;}
-.bar select,.bar input{border:1px solid #E6EBF3;border-radius:8px;padding:6px 9px;font-size:12px;font-family:inherit;color:#1C2A46;}
-.hint{font-size:12px;color:#93A0B8;margin:4px 0 12px;}
+.bar select,.bar input{border:1px solid #D7DFEA;border-radius:8px;padding:6px 9px;font-size:12px;font-family:inherit;color:#0F172A;}
+.hint{font-size:12px;color:#94A3B8;margin:4px 0 12px;}
 .layout{display:flex;gap:14px;align-items:flex-start;}
-.col{flex:1.7;min-width:0;}.side{flex:1;min-width:215px;}
+.col{flex:2.33;min-width:0;}.side{flex:1;min-width:230px;}
 .sectit{font-size:15px;font-weight:700;margin-bottom:8px;}
-.card{background:#fff;border:0.5px solid #E6EBF3;border-radius:12px;padding:12px 14px;margin-bottom:10px;}
+.card{background:#fff;border:0.5px solid #D7DFEA;border-radius:12px;padding:12px 14px;margin-bottom:10px;}
 .badge{font-size:11px;padding:2px 8px;border-radius:8px;}
-.cat{font-size:11px;padding:2px 8px;border-radius:8px;background:#F4F7FC;color:#5B6A86;}
-.qline{font-size:12.5px;color:#5B6A86;margin-bottom:3px;}
-.qval{color:#1C2A46;}
-.cbtn{font-size:12px;padding:5px 10px;border-radius:8px;border:0.5px solid #D5DDEC;color:#1C2A46;cursor:pointer;background:#fff;}
-.cbtn.p{background:#2D5BD6;color:#fff;border:none;}
+.cat{font-size:11px;padding:2px 8px;border-radius:8px;background:#F4F7FC;color:#475569;}
+.qline{font-size:12.5px;color:#475569;margin-bottom:3px;}
+.qval{color:#0F172A;}
+.cbtn{font-size:12px;padding:5px 10px;border-radius:8px;border:0.5px solid #D7DFEA;color:#0F172A;cursor:pointer;background:#fff;}
+.cbtn.p{background:#2563EB;color:#fff;border:none;}
 .bf{background:#0E1B3A;color:#fff;border-radius:12px;padding:14px 16px;}
 .bf .l{font-size:13px;color:#A8B3CC;margin-bottom:4px;}
 .kw{font-size:12px;padding:3px 9px;border-radius:8px;background:#1B2A4E;color:#cfe;}
@@ -132,13 +133,13 @@ body{font-family:'Noto Sans KR',system-ui,sans-serif;color:#1C2A46;background:#f
 </div>
 <div class='hint'>출처 유형과 긴급도를 별도로 선택합니다. (예: 공식자료 + 긴급만 보기)</div>
 <div class='layout'><div class='col'>
-<div class='sectit'>오늘 꼭 볼 소식 <span id='cnt' style='color:#93A0B8;font-size:13px;'></span></div>
+<div class='sectit'>오늘 꼭 볼 소식 <span id='cnt' style='color:#94A3B8;font-size:13px;'></span></div>
 <div id='cards'></div></div>
 <div class='side' id='side'></div></div></div>
 <script>
 var D=__DATA__;
-var ST={official:["공식자료","#E7EEFC","#2D5BD6"],media:["언론기사","#EEF1F5","#5B6A86"],
-        association:["협회자료","#F0EAF8","#7A4FB5"],unknown:["기타 출처","#EEF1F5","#5B6A86"]};
+var ST={official:["공식자료","#E7EEFC","#2563EB"],media:["언론기사","#EEF1F5","#475569"],
+        association:["협회자료","#F0EAF8","#7A4FB5"],unknown:["기타 출처","#EEF1F5","#475569"]};
 var STA={urgent:["긴급","#FDECEC","#C0392B"],confirmed:["공식 확인","#E3F4EC","#1B8A5A"],checking:["확인 중","#FCF3DD","#B9770E"]};
 var PERIODS={"최근 1일":1,"최근 3일":3,"최근 7일":7,"최근 30일":30,"전체":0};
 var fSt="all",fUrg=false,fCat="all",fQ="",fSrc="all";
@@ -169,17 +170,17 @@ function render(){
   var rows=D.items.filter(match);
   document.getElementById('cnt').textContent="· "+rows.length+"건";
   var c=document.getElementById('cards');c.innerHTML="";
-  if(!rows.length){c.innerHTML="<div style='font-size:13px;color:#93A0B8;padding:14px;'>해당 조건의 소식이 없습니다.</div>";}
+  if(!rows.length){c.innerHTML="<div style='font-size:13px;color:#94A3B8;padding:14px;'>해당 조건의 소식이 없습니다.</div>";}
   rows.forEach(function(o){
     var s=ST[o.st]||ST.unknown, stt=o.status?STA[o.status]:null;
     var div=el('div','card');
     div.innerHTML=
       "<div style='display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:6px;'>"+
       badge(s)+(stt?badge(stt):"")+"<span class='cat'>"+o.cat+"</span>"+
-      (o.rel>0?"<span style='font-size:11px;color:#93A0B8;margin-left:auto;'>관련 보도 "+o.rel+"건</span>":"")+"</div>"+
+      (o.rel>0?"<span style='font-size:11px;color:#94A3B8;margin-left:auto;'>관련 보도 "+o.rel+"건</span>":"")+"</div>"+
       "<div style='font-size:15px;font-weight:500;margin-bottom:2px;'>"+o.title+"</div>"+
-      "<div style='font-size:12px;color:#93A0B8;margin-bottom:6px;'>["+o.src+"] · "+o.date+"</div>"+
-      (o.sum?"<div style='font-size:13px;color:#5B6A86;line-height:1.55;margin-bottom:8px;'>"+o.sum+"</div>":"")+
+      "<div style='font-size:12px;color:#94A3B8;margin-bottom:6px;'>["+o.src+"] · "+o.date+"</div>"+
+      (o.sum?"<div style='font-size:13px;color:#475569;line-height:1.55;margin-bottom:8px;'>"+o.sum+"</div>":"")+
       "<div class='qline'>QA 확인사항: <span class='qval'>"+o.qa+"</span></div>"+
       "<div class='qline' style='margin-bottom:10px;'>영향 업무: <span class='qval'>"+o.aff+"</span></div>"+
       "<div style='display:flex;gap:6px;'><span class='cbtn p' data-qa='"+o.id+"'>QA 분석</span>"+
@@ -206,6 +207,8 @@ function renderSide(){
 }
 initBar();render();renderSide();
 hideBridges();var _hb=setInterval(hideBridges,400);setTimeout(function(){clearInterval(_hb);},8000);
+function _fit(){try{var h=document.body.scrollHeight;if(window.frameElement){window.frameElement.style.height=h+'px';window.frameElement.style.minHeight=h+'px';}}catch(e){}}
+_fit();window.addEventListener('load',_fit);setTimeout(_fit,300);setTimeout(_fit,900);
 </script></body></html>"""
 
 
@@ -267,7 +270,7 @@ def _handle_bridge(cmd):
 def render():
     period = st.session_state.get("news_period", 30)
     payload = _build_payload(period)
-    components.html(_news_html(payload), height=860, scrolling=True)
+    components.html(_news_html(payload), height=900, scrolling=False)
 
     _quick_actions(payload)
 

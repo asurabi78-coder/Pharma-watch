@@ -66,10 +66,10 @@ THEMES = {
         "danger": "#F08A82", "danger_soft": "#3D2020",
     },
     "라이트 (Pharma)": {
-        "bg_0": "#FFFFFF", "bg_1": "#FFFFFF", "bg_2": "#F4F7FC",
-        "border": "#E6EBF3", "border_strong": "#D5DDEC",
-        "text": "#1C2A46", "text_2": "#5B6A86", "text_3": "#93A0B8",
-        "accent": "#2D5BD6", "accent_soft": "#E7EEFC",
+        "bg_0": "#F4F7FB", "bg_1": "#FFFFFF", "bg_2": "#EEF3FB",
+        "border": "#D7DFEA", "border_strong": "#C7D2E6",
+        "text": "#0F172A", "text_2": "#475569", "text_3": "#94A3B8",
+        "accent": "#2563EB", "accent_soft": "#E7EEFC",
         "qa": "#12B5A5", "qa_soft": "#DFF6F2",
         "warn": "#C0790F", "warn_soft": "#FDF0DC",
         "danger": "#D8453E", "danger_soft": "#FBE7E6",
@@ -197,7 +197,13 @@ def inject_dark_theme():
 html, body, [data-testid="stAppViewContainer"] {{
     background: var(--bg-0) !important;
     color: var(--text) !important;
-    font-family: 'Noto Sans KR', system-ui, sans-serif !important;
+    font-family: 'Pretendard', 'Noto Sans KR', system-ui, sans-serif !important;
+    font-size: 15px !important;
+}}
+/* ── 콘텐츠 폭 통일 (1440 그리드) ── */
+[data-testid="stMainBlockContainer"], .block-container {{
+    max-width: 1440px !important;
+    margin: 0 auto !important;
 }}
 
 /* ── 본문 가독성 강화 ── */
@@ -256,7 +262,8 @@ pre code {{
 div[data-testid="stVerticalBlockBorderWrapper"] {{
     background: var(--bg-1) !important;
     border: 1px solid var(--border) !important;
-    border-radius: 10px !important;
+    border-radius: 8px !important;
+    box-shadow: 0 1px 3px rgba(15,23,42,0.06) !important;
 }}
 
 [data-testid="stExpander"] {{
@@ -333,11 +340,25 @@ header [data-testid="stHeaderActionElements"] {{ visibility: hidden; }}
     color: var(--sidebar-text-dim) !important;
 }}
 
-/* ── 제목 타이포 ── */
-h1, h2, h3 {{
-    font-family: 'DM Serif Display', 'Noto Serif KR', serif !important;
+/* ── 제목 타이포 (Pretendard 통일 · 위계 강화) ── */
+h1, h2, h3, h4 {{
+    font-family: 'Pretendard', 'Noto Sans KR', system-ui, sans-serif !important;
     color: var(--text) !important;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.02em;
+    font-weight: 700 !important;
+}}
+h1 {{ font-size: 1.9rem !important; }}
+h2 {{ font-size: 1.45rem !important; }}
+h3 {{ font-size: 1.15rem !important; }}
+/* ── 사이드바 현재 메뉴 강조 (파란 배경 + 왼쪽 굵은 선) ── */
+[data-testid="stSidebar"] .stButton button[kind="primary"],
+[data-testid="stSidebar"] button[kind="primary"],
+[data-testid="stSidebar"] button[data-testid="baseButton-primary"],
+[data-testid="stSidebar"] button[data-testid="stBaseButton-primary"] {{
+    background: var(--accent) !important;
+    border-color: var(--accent) !important;
+    color: #ffffff !important;
+    box-shadow: inset 3px 0 0 0 #1D4ED8 !important;
 }}
 
 code, pre, .stCode, [data-testid="stMetricValue"] {{
@@ -395,7 +416,8 @@ def inject_global_css():
     st.html("""
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Serif+Display&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 """.strip())
 
 

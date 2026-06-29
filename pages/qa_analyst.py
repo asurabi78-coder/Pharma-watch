@@ -38,7 +38,7 @@ def _title_html() -> str:
     bg = t.get("bg_1", "#10141f")
     tx = t.get("text", "#f1f5fb")
     return f"""<!doctype html><html><head><meta charset='utf-8'>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Noto+Serif+KR:wght@400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>html,body{{margin:0;background:transparent;overflow:hidden;}}</style></head>
 <body><div style="display:flex;align-items:center;gap:12px;">
 <svg width="46" height="46" viewBox="0 0 100 100" style="flex:0 0 auto;">
@@ -47,7 +47,7 @@ def _title_html() -> str:
 <line x1="50" y1="50" x2="50" y2="30"/><line x1="50" y1="50" x2="34" y2="44"/><line x1="50" y1="50" x2="66" y2="44"/><line x1="50" y1="50" x2="38" y2="66"/><line x1="50" y1="50" x2="62" y2="66"/><line x1="34" y1="44" x2="50" y2="30"/><line x1="66" y1="44" x2="50" y2="30"/></g>
 <g fill="{ac}"><circle cx="50" cy="30" r="3.6"/><circle cx="34" cy="44" r="3.6"/><circle cx="66" cy="44" r="3.6"/><circle cx="38" cy="66" r="3.6"/><circle cx="62" cy="66" r="3.6"/></g>
 <circle cx="50" cy="50" r="6.5" fill="{bg}" stroke="{qa}" stroke-width="3"/></svg>
-<span style="font-family:'DM Serif Display','Noto Serif KR',serif;font-size:33px;color:{tx};letter-spacing:-0.01em;line-height:1;">QA 분석가</span>
+<span style="font-family:'Pretendard','Noto Sans KR',sans-serif;font-weight:700;font-size:28px;color:{tx};letter-spacing:-0.01em;line-height:1;">QA 분석가</span>
 </div></body></html>"""
 
 
@@ -141,32 +141,39 @@ def render():
         "(분석·요약 전용 — 의사결정/거부권 없음)"
     )
 
-    text = st.text_area(
-        "분석할 규제·고시·뉴스 내용을 붙여넣으세요",
-        height=160,
-        placeholder="예: 의약품 등의 안전에 관한 규칙 개정 — 입출고 시 품질책임자(QA) 입회 요건 신설 ...",
-        key="qa_input",
-    )
+    col_in, col_out = st.columns([3, 2], gap="large")
 
-    if st.button("영향도 분석", type="primary", key="qa_run"):
+    with col_in:
+        text = st.text_area(
+            "분석할 규제·고시·뉴스 내용을 붙여넣으세요",
+            height=260,
+            placeholder="예: 의약품 등의 안전에 관한 규칙 개정 — 입출고 시 품질책임자(QA) 입회 요건 신설 ...",
+            key="qa_input",
+        )
+        run = st.button("영향도 분석", type="primary", key="qa_run",
+                        use_container_width=True)
+
+    if run:
         if not text.strip():
-            st.warning("분석할 내용을 입력하세요.")
+            with col_out:
+                st.warning("분석할 내용을 입력하세요.")
         else:
             try:
                 from utils.claude_client import call_claude
 
-                loader = st.empty()
-                with loader.container():
-                    components.html(_loader_html(), height=192)
-                try:
-                    out = call_claude(
-                        system=_load_prompt(),
-                        messages=[{"role": "user", "content": text.strip()}],
-                        max_tokens=900,
-                        feature="qa_analyst",
-                    )
-                finally:
-                    loader.empty()
+                with col_out:
+                    loader = st.empty()
+                    with loader.container():
+                        components.html(_loader_html(), height=192)
+                    try:
+                        out = call_claude(
+                            system=_load_prompt(),
+                            messages=[{"role": "user", "content": text.strip()}],
+                            max_tokens=900,
+                            feature="qa_analyst",
+                        )
+                    finally:
+                        loader.empty()
                 # 분석 실행 행동 기록 (토큰은 call_claude 내부에서 별도 기록)
                 try:
                     from data_layer import usage as _usage
@@ -184,19 +191,24 @@ def render():
                     st.session_state["qa_saved_notice"] = False
                     st.session_state["qa_save_err"] = f"{type(e).__name__}: {e}"
             except Exception as e:  # noqa: BLE001
-                st.error("분석 호출에 실패했습니다. .env 의 ANTHROPIC_API_KEY 설정을 확인하세요.")
-                st.caption(f"detail: {type(e).__name__}: {e}")
+                with col_out:
+                    st.error("분석 호출에 실패했습니다. .env 의 ANTHROPIC_API_KEY 설정을 확인하세요.")
+                    st.caption(f"detail: {type(e).__name__}: {e}")
 
-    # ── 최근 분석 결과 (rerun 후에도 유지) ──
-    last_a = st.session_state.get("qa_last_a")
-    if last_a:
-        st.markdown("---")
-        st.markdown("#### 분석 결과")
-        if st.session_state.pop("qa_saved_notice", False):
-            st.success("✅ 기록에 저장되었습니다. 아래 '저장된 분석 기록'에서 다시 볼 수 있어요.")
-        elif st.session_state.get("qa_save_err"):
-            st.warning(f"기록 저장 실패: {st.session_state.pop('qa_save_err')}")
-        st.markdown(last_a)
+    # ── 분석 결과 (우측 40% 패널, rerun 후에도 유지) ──
+    with col_out:
+        last_a = st.session_state.get("qa_last_a")
+        if last_a:
+            st.markdown("#### 분석 결과")
+            if st.session_state.pop("qa_saved_notice", False):
+                st.success("✅ 기록에 저장되었습니다. 아래 '저장된 분석 기록'에서 다시 볼 수 있어요.")
+            elif st.session_state.get("qa_save_err"):
+                st.warning(f"기록 저장 실패: {st.session_state.pop('qa_save_err')}")
+            with st.container(border=True):
+                st.markdown(last_a)
+        else:
+            with st.container(border=True):
+                st.caption("좌측에 내용을 붙여넣고 ‘영향도 분석’을 누르면 결과가 여기에 표시됩니다.")
 
     # ── 저장된 분석 기록 (목록 + 삭제) — 현재 계정 것만 ──
     _render_history(_uid)

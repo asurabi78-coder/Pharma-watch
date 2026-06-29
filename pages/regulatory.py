@@ -81,21 +81,22 @@ def _build_payload(query):
 
 _TEMPLATE = """<!doctype html><html><head><meta charset='utf-8'>
 <link href='https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap' rel='stylesheet'>
+<link rel='stylesheet' href='https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css'>
 <style>
 *{box-sizing:border-box;}html,body{margin:0;}
-body{font-family:'Noto Sans KR',system-ui,sans-serif;color:#15233F;background:#fff;}
+body{font-family:'Pretendard','Noto Sans KR',system-ui,sans-serif;color:#0F172A;background:#fff;font-size:14px;}
 .wrap{padding:4px 2px 18px;}
 .chips{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
-.lbl{font-size:12px;color:#8A94A6;}
-.fc{font-size:13px;padding:6px 12px;border-radius:9px;border:1px solid #D8DEEA;color:#5B6A86;cursor:pointer;background:#fff;}
+.lbl{font-size:12px;color:#94A3B8;}
+.fc{font-size:13px;padding:6px 12px;border-radius:9px;border:1px solid #D7DFEA;color:#475569;cursor:pointer;background:#fff;}
 .fc.on{background:#2563EB;color:#fff;border-color:#2563EB;}
 .layout{display:flex;gap:14px;align-items:flex-start;}
-.col{flex:1.6;min-width:0;}.side{flex:1;min-width:225px;}
+.col{flex:2.33;min-width:0;}.side{flex:1;min-width:230px;}
 .noex{background:#FFF7E6;border:1px solid #FFE2A8;color:#92600A;border-radius:10px;padding:10px 12px;font-size:13px;margin-bottom:12px;}
 .sec{font-size:13px;font-weight:700;margin:14px 0 8px;padding-left:8px;border-left:3px solid #2563EB;}
 .sec.foreign{border-left-color:#8B5CF6;color:#6D28D9;}
 .sec.internal{border-left-color:#94A3B8;color:#64748B;}
-.ev{background:#fff;border:1px solid #E3E8F0;border-radius:12px;padding:12px 14px;margin-bottom:10px;}
+.ev{background:#fff;border:1px solid #D7DFEA;border-radius:12px;padding:12px 14px;margin-bottom:10px;}
 .bg{font-size:11px;font-weight:500;padding:2px 9px;border-radius:8px;margin-right:4px;}
 .law{background:#DBE7FF;color:#1D4ED8;}
 .notice{background:#FFEACC;color:#B45309;}
@@ -105,21 +106,21 @@ body{font-family:'Noto Sans KR',system-ui,sans-serif;color:#15233F;background:#f
 .cur{background:#CFF4DF;color:#047857;}
 .ref{background:#E7ECF4;color:#64748B;}
 .evt{font-size:15px;font-weight:500;}
-.evm{font-size:12px;color:#8A94A6;margin:3px 0;}
+.evm{font-size:12px;color:#94A3B8;margin:3px 0;}
 .why{font-size:12.5px;color:#2563EB;margin:4px 0;}
 .row{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;}
-.act{font-size:12px;padding:5px 11px;border-radius:8px;border:1px solid #D5DDEC;color:#15233F;cursor:pointer;background:#fff;}
+.act{font-size:12px;padding:5px 11px;border-radius:8px;border:1px solid #D7DFEA;color:#0F172A;cursor:pointer;background:#fff;}
 .act.p{background:#2563EB;color:#fff;border:none;}
 .detail{margin-top:8px;padding:9px 11px;background:#F5F8FE;border-radius:8px;font-size:12.5px;color:#3A4761;white-space:pre-wrap;line-height:1.55;}
-.sumcard{background:#fff;border:1px solid #E3E8F0;border-radius:14px;overflow:hidden;}
+.sumcard{background:#fff;border:1px solid #D7DFEA;border-radius:14px;overflow:hidden;}
 .sumhd{background:#0E1B3A;color:#fff;padding:11px 14px;font-weight:500;}
 .sumbd{padding:12px 14px;}
-.note{font-size:12px;color:#5B6A86;background:#F1F5FB;border-radius:8px;padding:9px 11px;margin:8px 0;}
-.btn{width:100%;border-radius:9px;padding:10px;font-size:13px;cursor:pointer;border:1px solid #D8DEEA;background:#fff;color:#15233F;}
+.note{font-size:12px;color:#475569;background:#F1F5FB;border-radius:8px;padding:9px 11px;margin:8px 0;}
+.btn{width:100%;border-radius:9px;padding:10px;font-size:13px;cursor:pointer;border:1px solid #D7DFEA;background:#fff;color:#0F172A;}
 .btn.p{background:#2563EB;color:#fff;border:none;margin-bottom:6px;}
-.faq{display:flex;gap:8px;align-items:center;flex-wrap:wrap;border-top:1px solid #E3E8F0;margin-top:14px;padding-top:10px;}
+.faq{display:flex;gap:8px;align-items:center;flex-wrap:wrap;border-top:1px solid #D7DFEA;margin-top:14px;padding-top:10px;}
 .fq{font-size:12px;padding:6px 11px;border-radius:9px;background:#EEF3FB;color:#3A4761;cursor:pointer;}
-.empty{font-size:13px;color:#8A94A6;padding:16px;border:1px dashed #D8DEEA;border-radius:12px;}
+.empty{font-size:13px;color:#94A3B8;padding:16px;border:1px dashed #D7DFEA;border-radius:12px;}
 </style></head><body><div class='wrap'>
 <div class='chips' id='chips'></div>
 <div class='layout'>
@@ -172,7 +173,7 @@ function renderResults(){
 }
 function renderSum(){
   var s=document.getElementById('sum');
-  if(!D.hasQuery){s.innerHTML="<div style='font-size:13px;color:#8A94A6;'>검색하면 관련 공식 근거 요약이 표시됩니다.</div>";return;}
+  if(!D.hasQuery){s.innerHTML="<div style='font-size:13px;color:#94A3B8;'>검색하면 관련 공식 근거 요약이 표시됩니다.</div>";return;}
   var h="<div style='font-size:13px;margin-bottom:8px;'>‘"+(D.query.length>30?D.query.slice(0,30)+'…':D.query)+"’ 에 대한 공식 근거 <b>"+D.count+"건</b>을 찾았습니다.</div>";
   h+="<div class='note'>ℹ 검색 결과는 근거 확인용 보조자료입니다. 회사 업무 영향·SOP 변경·Action Item은 ‘QA 분석가’에서 확정합니다. 최종 판단은 관리약사 또는 품질책임자가 검토해야 합니다.</div>";
   h+="<div class='btn p' id='bqa'>QA 분석가에게 영향 분석 요청</div><div class='btn' id='bsrc'>law.go.kr 통합검색</div>";
@@ -186,6 +187,8 @@ function renderFaq(){
 }
 renderChips();renderResults();renderSum();renderFaq();
 hideBridges();var _hb=setInterval(hideBridges,400);setTimeout(function(){clearInterval(_hb);},8000);
+function _fit(){try{var h=document.body.scrollHeight;if(window.frameElement){window.frameElement.style.height=h+'px';window.frameElement.style.minHeight=h+'px';}}catch(e){}}
+_fit();window.addEventListener('load',_fit);setTimeout(_fit,300);setTimeout(_fit,900);var _fi=setInterval(_fit,1200);setTimeout(function(){clearInterval(_fi);},9000);
 </script></body></html>"""
 
 
@@ -242,7 +245,7 @@ def render():
             st.rerun()
 
     payload = _build_payload(st.session_state["reg_q"])
-    components.html(_reg_html(payload), height=680, scrolling=True)
+    components.html(_reg_html(payload), height=900, scrolling=False)
 
     if payload["hasQuery"]:
         if st.button("💬 QA 분석가에게 영향 분석 요청", key="reg_quick_qa"):
